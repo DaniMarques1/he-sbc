@@ -22,12 +22,12 @@ export function ResultsTable() {
   ];
 
   return (
-    <section className="bg-white rounded-full overflow-hidden shadow-sm border border-outline-variant/10">
-      <div className="px-8 py-6">
-        <div className={`flex justify-between items-start ${isExpanded ? 'mb-6' : ''}`}>
-          <div className="flex items-center gap-3">
+    <section className="bg-white rounded-2xl md:rounded-full overflow-hidden shadow-sm border border-outline-variant/10">
+      <div className="px-4 md:px-8 py-4 md:py-6">
+        <div className={`flex justify-between items-start ${isExpanded ? 'mb-4 md:mb-6' : ''}`}>
+          <div className="flex items-center gap-2 md:gap-3">
             <span className="material-symbols-outlined text-primary" data-icon="grade">grade</span>
-            <h3 className="text-lg font-bold font-headline text-primary uppercase tracking-wider">Resultados do Ensino Fundamental</h3>
+            <h3 className="text-sm md:text-lg font-bold font-headline text-primary uppercase tracking-wider">Resultados do Ensino Fundamental</h3>
           </div>
           <button
             className="text-secondary hover:text-primary transition-all p-1 -mr-1 rounded-full hover:bg-surface-variant/50"
@@ -39,8 +39,8 @@ export function ResultsTable() {
           </button>
         </div>
         {isExpanded && (
-          <div className="overflow-hidden rounded-xl bg-white shadow-sm border border-outline-variant/10">
-            <table className="w-full text-left border-collapse">
+          <div className="overflow-x-auto rounded-xl bg-white shadow-sm border border-outline-variant/10">
+            <table className="w-full text-left border-collapse min-w-[700px]">
               <thead>
                 <tr className="bg-primary-container text-white">
                   <th className="px-6 py-3 text-[10px] font-label font-bold uppercase tracking-widest border-r border-white/10">Disciplinas Estudadas</th>

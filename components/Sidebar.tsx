@@ -1,13 +1,13 @@
 export function Sidebar() {
   return (
-    <nav className="h-screen w-64 fixed left-0 top-0 border-r-0 bg-[#f3f2fe] flex flex-col py-6 z-50">
+    <nav className="hidden md:flex h-screen w-64 fixed left-0 top-0 border-r-0 bg-[#f3f2fe] flex-col py-6 z-50">
       <div className="px-8 mb-10">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 min-w-10 bg-primary-container rounded-xl flex items-center justify-center">
             <span className="material-symbols-outlined text-white" data-icon="school">school</span>
           </div>
           <div>
-            <h1 className="font-manrope font-black text-[#1A237E] leading-none tracking-tight">Gerador de Histórico Escolar</h1>
+            <h1 className="font-manrope font-black text-[#1A237E] leading-tight tracking-tight text-sm">Gerador de Histórico Escolar</h1>
             <span className="text-[10px] font-manrope font-semibold tracking-widest text-secondary uppercase">HE - SBC</span>
           </div>
         </div>

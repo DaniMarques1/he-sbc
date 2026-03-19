@@ -6,12 +6,12 @@ export function StudentData() {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <section className="bg-surface-container-low rounded-full overflow-hidden shadow-sm">
-      <div className="px-8 py-6">
-        <div className={`flex justify-between items-start ${isExpanded ? 'mb-6' : ''}`}>
-          <div className="flex items-center gap-3">
+    <section className="bg-surface-container-low rounded-2xl md:rounded-full overflow-hidden shadow-sm">
+      <div className="px-4 md:px-8 py-4 md:py-6">
+        <div className={`flex justify-between items-start ${isExpanded ? 'mb-4 md:mb-6' : ''}`}>
+          <div className="flex items-center gap-2 md:gap-3">
             <span className="material-symbols-outlined text-primary" data-icon="person">person</span>
-            <h3 className="text-lg font-bold font-headline text-primary uppercase tracking-wider">Identificação do Aluno</h3>
+            <h3 className="text-sm md:text-lg font-bold font-headline text-primary uppercase tracking-wider">Identificação do Aluno</h3>
           </div>
           <button
             className="text-secondary hover:text-primary transition-all p-1 -mr-1 rounded-full hover:bg-surface-variant/50"
