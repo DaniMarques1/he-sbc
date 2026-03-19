@@ -13,7 +13,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Scholar Metric - Histórico Escolar",
+  title: "Gerador de Histórico Escolar - SBC",
   description: "Academic Archive",
 };
 

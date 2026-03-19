@@ -8,14 +8,19 @@ export function Header({ isMobileMenuOpen, onToggleMobileMenu }: HeaderProps) {
     <header className="bg-[#fbf8ff] flex flex-col w-full sticky top-0 z-40 border-b border-transparent md:border-none transition-all">
       <div className="flex justify-between items-center px-4 md:px-8 py-4 w-full">
         <div className="flex items-center gap-2 md:gap-4">
-          {onToggleMobileMenu && (
-            <button className="md:hidden p-2 text-secondary hover:bg-[#e8e7f2] rounded-full transition-colors" onClick={onToggleMobileMenu}>
-              <span className="material-symbols-outlined" data-icon={isMobileMenuOpen ? "close" : "menu"}>
-                {isMobileMenuOpen ? "close" : "menu"}
-              </span>
-            </button>
-          )}
-          <h2 className="font-manrope font-bold text-lg md:text-2xl text-[#1A237E]">Histórico Escolar</h2>
+          <div 
+            className="flex items-center gap-2 md:gap-4 cursor-pointer md:cursor-auto select-none" 
+            onClick={onToggleMobileMenu}
+          >
+            {onToggleMobileMenu && (
+              <button className="md:hidden p-2 text-secondary hover:bg-[#e8e7f2] rounded-full transition-colors">
+                <span className="material-symbols-outlined" data-icon={isMobileMenuOpen ? "close" : "menu"}>
+                  {isMobileMenuOpen ? "close" : "menu"}
+                </span>
+              </button>
+            )}
+            <h2 className="font-manrope font-bold text-lg md:text-2xl text-[#1A237E]">Histórico Escolar</h2>
+          </div>
           <div className="hidden md:flex bg-surface-container-high px-3 py-1 rounded-full items-center gap-2">
             <span className="material-symbols-outlined text-xs text-secondary" data-icon="calendar_today">calendar_today</span>
             <input type="text" defaultValue="18/03/2026" className="text-xs font-medium text-secondary bg-transparent w-18 focus:outline-none text-center" />

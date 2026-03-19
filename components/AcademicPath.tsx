@@ -16,19 +16,19 @@ export function AcademicPath() {
   return (
     <section className="bg-surface-container-low rounded-2xl md:rounded-full overflow-hidden shadow-sm">
       <div className="px-4 md:px-8 py-4 md:py-6">
-        <div className={`flex justify-between items-start ${isExpanded ? 'mb-4 md:mb-6' : ''}`}>
+        <div 
+          className={`flex justify-between items-center cursor-pointer group select-none ${isExpanded ? 'mb-4 md:mb-6' : ''}`}
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
           <div className="flex items-center gap-2 md:gap-3">
             <span className="material-symbols-outlined text-primary" data-icon="history_edu">history_edu</span>
             <h3 className="text-sm md:text-lg font-bold font-headline text-primary uppercase tracking-wider">Percurso Acadêmico</h3>
           </div>
-          <button 
-            className="text-secondary hover:text-primary transition-all p-1 -mr-1 rounded-full hover:bg-surface-variant/50"
-            onClick={() => setIsExpanded(!isExpanded)}
-          >
+          <div className="text-secondary group-hover:text-primary transition-all p-1 -mr-1 rounded-full group-hover:bg-surface-variant/50">
             <span className="material-symbols-outlined" data-icon={isExpanded ? "expand_less" : "expand_more"}>
               {isExpanded ? "expand_less" : "expand_more"}
             </span>
-          </button>
+          </div>
         </div>
         {isExpanded && (
           <div className="overflow-x-auto">
