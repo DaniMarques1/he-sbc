@@ -2,8 +2,28 @@
 
 import { useState } from "react";
 
+type Observation = { id: string; title: string; text: string; checked: boolean };
+
+const defaultObs: Observation[] = [
+  { id: '1', title: "Progressão Regular", text: "O aluno concluiu todos os componentes curriculares com aproveitamento satisfatório.", checked: true },
+  { id: '2', title: "Necessidades Especiais", text: "Especificar adaptações curriculares...", checked: false },
+  { id: '3', title: "Aceleração de Estudos", text: "Conforme Resolução SE nº 00/2024.", checked: false },
+  { id: '4', title: "Observações de Transferência", text: "Documentação completa entregue na secretaria em conformidade com as exigências legais vigentes.", checked: true }
+];
+
 export function Observations() {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [observations, setObservations] = useState<Observation[]>(defaultObs);
+
+  const addObservation = () => {
+    const newObs = {
+      id: Date.now().toString(),
+      title: "Nova Observação",
+      text: "",
+      checked: true
+    };
+    setObservations([...observations, newObs]);
+  };
 
   return (
     <section className="bg-white rounded-2xl md:rounded-full overflow-hidden shadow-sm border border-outline-variant/10">
@@ -23,39 +43,65 @@ export function Observations() {
           </div>
         </div>
         {isExpanded && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <input defaultChecked className="mt-1 rounded border-outline-variant text-primary focus:ring-primary h-4 w-4" type="checkbox" />
-                <div>
-                  <label className="text-sm font-semibold text-on-surface">Progressão Regular</label>
-                  <input type="text" defaultValue="O aluno concluiu todos os componentes curriculares com aproveitamento satisfatório." className="text-xs text-secondary italic bg-transparent w-full focus:outline-none" />
+          <div className="flex flex-col gap-5">
+            {observations.map((obs, index) => (
+              <div key={obs.id} className="flex items-start gap-3 w-full">
+                <input 
+                  type="checkbox" 
+                  checked={obs.checked}
+                  onChange={(e) => {
+                    const newObs = [...observations];
+                    newObs[index].checked = e.target.checked;
+                    setObservations(newObs);
+                  }}
+                  className="mt-1.5 rounded border-outline-variant text-primary focus:ring-primary h-4 w-4 cursor-pointer" 
+                />
+                <div className="flex-1 flex flex-col gap-1">
+                  <input 
+                    type="text" 
+                    value={obs.title} 
+                    onChange={(e) => {
+                      const newObs = [...observations];
+                      newObs[index].title = e.target.value;
+                      setObservations(newObs);
+                    }}
+                    className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none focus:border-b border-primary/30 pb-0.5 transition-colors" 
+                  />
+                  <textarea 
+                    value={obs.text}
+                    onChange={(e) => {
+                      const newObs = [...observations];
+                      newObs[index].text = e.target.value;
+                      setObservations(newObs);
+                    }}
+                    disabled={!obs.checked}
+                    className="w-full bg-surface-container-high border-none rounded-lg text-xs py-2 px-3 focus:ring-1 focus:ring-primary outline-none min-h-[60px] resize-y disabled:opacity-50 disabled:cursor-not-allowed transition-all" 
+                    rows={2}
+                  />
                 </div>
+                {index >= 4 && (
+                  <button 
+                    onClick={() => {
+                      const newObs = [...observations];
+                      newObs.splice(index, 1);
+                      setObservations(newObs);
+                    }}
+                    className="mt-1 text-error/70 hover:text-error transition-colors p-1 rounded-full hover:bg-error/10"
+                    title="Remover observação"
+                  >
+                    <span className="material-symbols-outlined text-sm" data-icon="delete">delete</span>
+                  </button>
+                )}
               </div>
-              <div className="flex items-start gap-3">
-                <input className="mt-1 rounded border-outline-variant text-primary focus:ring-primary h-4 w-4" type="checkbox" />
-                <div>
-                  <label className="text-sm font-semibold text-on-surface">Necessidades Especiais</label>
-                  <input className="mt-1 block w-full bg-surface-container-high border-none rounded-lg text-xs py-2 px-3 focus:ring-1 focus:ring-primary" placeholder="Especificar adaptações curriculares..." type="text" />
-                </div>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <input className="mt-1 rounded border-outline-variant text-primary focus:ring-primary h-4 w-4" type="checkbox" />
-                <div>
-                  <label className="text-sm font-semibold text-on-surface">Aceleração de Estudos</label>
-                  <input type="text" defaultValue="Conforme Resolução SE nº 00/2024." className="text-xs text-secondary italic bg-transparent w-full focus:outline-none" />
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <input defaultChecked className="mt-1 rounded border-outline-variant text-primary focus:ring-primary h-4 w-4" type="checkbox" />
-                <div>
-                  <label className="text-sm font-semibold text-on-surface">Observações de Transferência</label>
-                  <textarea className="mt-1 block w-full bg-surface-container-high border-none rounded-lg text-xs py-2 px-3 focus:ring-1 focus:ring-primary" rows={2} defaultValue="Documentação completa entregue na secretaria em conformidade com as exigências legais vigentes." />
-                </div>
-              </div>
-            </div>
+            ))}
+            
+            <button 
+              onClick={addObservation}
+              className="mt-2 flex items-center gap-2 self-start text-sm font-medium text-primary hover:bg-primary/10 px-4 py-2 rounded-full transition-colors"
+            >
+              <span className="material-symbols-outlined text-lg" data-icon="add">add</span>
+              Adicionar Observação
+            </button>
           </div>
         )}
       </div>

@@ -10,20 +10,22 @@ import { AcademicPath } from "@/components/AcademicPath";
 import { TransferData } from "@/components/TransferData";
 import { Observations } from "@/components/Observations";
 import { ActionBar } from "@/components/ActionBar";
+import { Analytics } from "@vercel/analytics/next"
 
 export default function HistoricoEscolar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <>
+      <Analytics />
       <Sidebar />
       {/* Main Content Area */}
       <main className="md:ml-64 min-h-screen transition-all duration-300">
-        <Header 
-          isMobileMenuOpen={isMobileMenuOpen} 
-          onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+        <Header
+          isMobileMenuOpen={isMobileMenuOpen}
+          onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         />
-        
+
         {/* Content Canvas */}
         <div className="px-4 md:px-10 py-6 md:py-8 max-w-7xl mx-auto space-y-8 md:space-y-10">
           <SchoolData />
@@ -32,7 +34,7 @@ export default function HistoricoEscolar() {
           <AcademicPath />
           <TransferData />
           <Observations />
-          
+
           <ActionBar />
         </div>
       </main>

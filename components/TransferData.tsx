@@ -33,16 +33,24 @@ export function TransferData() {
             <input type="text" defaultValue="--/--/----" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none" />
           </div>
           <div className="space-y-1">
-            <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Classe/Turma</label>
-            <input type="text" defaultValue="6º Ano A" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none" />
+            <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Classe</label>
+            <input type="text" defaultValue="6º Ano" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none" />
+          </div>
+          <div className="space-y-1">
+            <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Turma</label>
+            <input type="text" defaultValue="A" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none" />
           </div>
           <div className="space-y-1">
             <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Período/Turno</label>
             <input type="text" defaultValue="Manhã" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none" />
           </div>
           <div className="space-y-1">
-            <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Ciclo/Ano</label>
-            <input type="text" defaultValue="2º Ciclo / 6º Ano" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none" />
+            <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Ciclo</label>
+            <input type="text" defaultValue="2º Ciclo" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none" />
+          </div>
+          <div className="space-y-1">
+            <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Ano</label>
+            <input type="text" defaultValue="6º Ano" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none" />
           </div>
           <div className="space-y-1">
             <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Total Faltas</label>
@@ -51,6 +59,14 @@ export function TransferData() {
           <div className="space-y-1">
             <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Dias Letivos</label>
             <input type="text" defaultValue="200" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none" />
+          </div>
+          <div className="space-y-1">
+            <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Até o</label>
+            <select className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none cursor-pointer">
+              <option value="1º Trimestre">1º Trimestre</option>
+              <option value="2º Trimestre">2º Trimestre</option>
+              <option value="3º Trimestre">3º Trimestre</option>
+            </select>
           </div>
         </div>
         )}
