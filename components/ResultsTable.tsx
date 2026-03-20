@@ -4,6 +4,13 @@ import { useState } from "react";
 
 export function ResultsTable() {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [rowTypes, setRowTypes] = useState<Record<number, string>>({
+    1: 'Resolução',
+    2: 'Resolução',
+    3: 'Resolução',
+    4: 'Resolução',
+    5: 'Resolução',
+  });
 
   const subjects = [
     { name: "Língua Portuguesa", grade: "9.0" },
@@ -22,9 +29,9 @@ export function ResultsTable() {
   ];
 
   return (
-    <section className="bg-white rounded-2xl md:rounded-full overflow-hidden shadow-sm border border-outline-variant/10">
+    <section className="bg-white rounded-2xl md:rounded-3xl overflow-hidden shadow-sm border border-outline-variant/10">
       <div className="px-4 md:px-8 py-4 md:py-6">
-        <div 
+        <div
           className={`flex justify-between items-center cursor-pointer group select-none ${isExpanded ? 'mb-4 md:mb-6' : ''}`}
           onClick={() => setIsExpanded(!isExpanded)}
         >
@@ -39,36 +46,85 @@ export function ResultsTable() {
           </div>
         </div>
         {isExpanded && (
-          <div className="overflow-x-auto rounded-xl bg-white shadow-sm border border-outline-variant/10">
-            <table className="w-full text-left border-collapse min-w-[700px]">
-              <thead>
-                <tr className="bg-primary-container text-white">
-                  <th className="px-6 py-3 text-[10px] font-label font-bold uppercase tracking-widest border-r border-white/10">Disciplinas Estudadas</th>
-                  {[1, 2, 3, 4, 5].map(year => (
-                    <th key={year} className="px-2 py-3 text-[10px] font-label font-bold uppercase tracking-widest text-center">{year}º Ano</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-outline-variant/10">
-                {subjects.map((subject) => (
-                  <tr key={subject.name} className="hover:bg-surface-container transition-colors">
-                    <td className="px-6 py-3 font-medium text-sm text-on-surface">
-                      <input type="text" defaultValue={subject.name} className="w-full bg-transparent focus:outline-none focus:border-b border-primary/30" />
-                    </td>
-                    {[1, 2, 3, 4, 5].map(year => (
-                      <td key={year} className="px-2 py-3 text-center">
+          <div className="flex flex-col gap-6">
+            <div className="overflow-x-auto rounded-xl bg-white shadow-sm border border-outline-variant/10">
+              <table className="w-full text-left border-collapse min-w-[500px]">
+                <thead>
+                  <tr className="bg-primary-container text-white">
+                    <th className="px-6 py-3 text-[10px] font-label font-bold uppercase tracking-widest border-r border-white/10 w-32 text-center md:text-left">Série</th>
+                    <th className="px-6 py-3 text-[10px] font-label font-bold uppercase tracking-widest border-r border-white/10 w-48 text-center md:text-left">Tipo</th>
+                    <th className="px-6 py-3 text-[10px] font-label font-bold uppercase tracking-widest text-center md:text-left">Resolução</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-outline-variant/10">
+                  {[1, 2, 3, 4, 5].map((year) => (
+                    <tr key={year} className="hover:bg-surface-container transition-colors">
+                      <td className="px-6 py-3 font-medium text-sm text-on-surface whitespace-nowrap text-center md:text-left">
+                        {year}º Ano
+                      </td>
+                      <td className="px-6 py-3">
+                        <select
+                          value={rowTypes[year] || 'Resolução'}
+                          onChange={(e) => setRowTypes({ ...rowTypes, [year]: e.target.value })}
+                          className="bg-secondary-container text-on-secondary-container px-3 py-2 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-all w-full cursor-pointer"
+                        >
+                          <option value="Notas">Notas</option>
+                          <option value="Resolução">Resolução</option>
+                        </select>
+                      </td>
+                      <td className="px-6 py-3">
                         <input
                           type="text"
-                          defaultValue="Resolução"
-                          onFocus={(e) => e.target.select()}
-                          className="bg-secondary-container text-on-secondary-container px-2 py-1 rounded-full text-[11px] font-bold w-[76px] text-center focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-all shadow-sm"
+                          defaultValue="Resolução SE nº18489/2010"
+                          disabled={rowTypes[year] === 'Notas'}
+                          className="w-full bg-transparent px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-b border-primary/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                         />
                       </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="overflow-x-auto rounded-xl bg-white shadow-sm border border-outline-variant/10">
+              <table className="w-full text-left border-collapse min-w-[700px]">
+                <thead>
+                  <tr className="bg-primary-container text-white">
+                    <th className="px-6 py-3 text-[10px] font-label font-bold uppercase tracking-widest border-r border-white/10">Disciplinas Estudadas</th>
+                    {[1, 2, 3, 4, 5].map(year => (
+                      <th key={year} className="px-2 py-3 text-[10px] font-label font-bold uppercase tracking-widest text-center">{year}º Ano</th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-outline-variant/10">
+                  {subjects.map((subject) => (
+                    <tr key={subject.name} className="hover:bg-surface-container transition-colors">
+                      <td className="px-6 py-3 font-medium text-sm text-on-surface">
+                        <input type="text" defaultValue={subject.name} className="w-full bg-transparent focus:outline-none focus:border-b border-primary/30" />
+                      </td>
+                      {[1, 2, 3, 4, 5].map(year => {
+                        const isResumo = rowTypes[year] !== 'Notas';
+                        return (
+                          <td key={year} className="px-2 py-3 text-center">
+                            <input
+                              key={`input-${year}-${isResumo}`}
+                              type="text"
+                              defaultValue={isResumo ? "Resolução" : "10"}
+                              disabled={isResumo}
+                              onFocus={(e) => e.target.select()}
+                              className={`px-2 py-1 rounded-full text-[11px] font-bold w-[76px] text-center focus:outline-none transition-all shadow-sm ${isResumo
+                                  ? "bg-surface-variant/50 text-on-surface/50 cursor-not-allowed"
+                                  : "bg-secondary-container text-on-secondary-container focus:ring-2 focus:ring-primary focus:bg-white"
+                                }`}
+                            />
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>
