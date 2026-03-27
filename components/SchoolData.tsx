@@ -8,7 +8,7 @@ export function SchoolData() {
   return (
     <section className="bg-surface-container-low rounded-2xl md:rounded-full overflow-hidden shadow-sm">
       <div className="bg-white px-4 md:px-8 py-4 md:py-6">
-        <div 
+        <div
           className={`flex justify-between items-center cursor-pointer group select-none ${isExpanded ? 'mb-4 md:mb-6' : ''}`}
           onClick={() => setIsExpanded(!isExpanded)}
         >
@@ -24,27 +24,27 @@ export function SchoolData() {
         </div>
         {isExpanded && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="space-y-1">
-            <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Nome da EMEB</label>
-            <input type="text" defaultValue="EMEB Professor Aristides Castelo Branco" className="text-on-surface font-medium border-b border-outline-variant/20 pb-1 bg-transparent w-full focus:outline-none" />
+            <div className="space-y-1">
+              <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Nome da EMEB</label>
+              <input type="text" defaultValue="EMEB PROFESSOR PAULO FREIRE" className="text-on-surface font-medium border-b border-outline-variant/20 pb-1 bg-transparent w-full focus:outline-none" />
+            </div>
+            <div className="md:col-span-2 space-y-1">
+              <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Endereço Completo</label>
+              <input type="text" defaultValue="Estrada Henrique Rosa, 411 - Riacho Grande - São Bernardo do Campo - SP" className="text-on-surface font-medium border-b border-outline-variant/20 pb-1 bg-transparent w-full focus:outline-none" />
+            </div>
+            <div className="space-y-1">
+              <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">CEP</label>
+              <input type="text" defaultValue="09831-505" className="text-on-surface font-medium border-b border-outline-variant/20 pb-1 bg-transparent w-full focus:outline-none" />
+            </div>
+            <div className="space-y-1">
+              <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Telefones</label>
+              <input type="text" defaultValue="(11) 4354-0773/(11) 4101-7799" className="text-on-surface font-medium border-b border-outline-variant/20 pb-1 bg-transparent w-full focus:outline-none" />
+            </div>
+            <div className="space-y-1">
+              <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Ato de Criação</label>
+              <input type="text" defaultValue="DECRETO nº 13.061 de 11/11/99" className="text-on-surface font-medium border-b border-outline-variant/20 pb-1 bg-transparent w-full focus:outline-none" />
+            </div>
           </div>
-          <div className="md:col-span-2 space-y-1">
-            <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Endereço Completo</label>
-            <input type="text" defaultValue="Rua das Acácias, 450 - Jardim das Flores - São Paulo - SP" className="text-on-surface font-medium border-b border-outline-variant/20 pb-1 bg-transparent w-full focus:outline-none" />
-          </div>
-          <div className="space-y-1">
-            <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">CEP</label>
-            <input type="text" defaultValue="01234-567" className="text-on-surface font-medium border-b border-outline-variant/20 pb-1 bg-transparent w-full focus:outline-none" />
-          </div>
-          <div className="space-y-1">
-            <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Telefones</label>
-            <input type="text" defaultValue="(11) 4002-8922 / (11) 4002-8923" className="text-on-surface font-medium border-b border-outline-variant/20 pb-1 bg-transparent w-full focus:outline-none" />
-          </div>
-          <div className="space-y-1">
-            <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Ato de Criação</label>
-            <input type="text" defaultValue="Decreto Municipal nº 12.345/2008" className="text-on-surface font-medium border-b border-outline-variant/20 pb-1 bg-transparent w-full focus:outline-none" />
-          </div>
-        </div>
         )}
       </div>
     </section>

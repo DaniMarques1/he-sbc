@@ -13,19 +13,19 @@ export function ResultsTable() {
   });
 
   const subjects = [
-    { name: "Língua Portuguesa", grade: "9.0" },
-    { name: "Matemática", grade: "8.5" },
-    { name: "História", grade: "9.5" },
-    { name: "Geografia", grade: "8.0" },
-    { name: "Ciências Físicas e Biológicas", grade: "7.5" },
-    { name: "Arte", grade: "10.0" },
-    { name: "Educação Física", grade: "9.0" },
-    { name: "Língua Estrangeira Moderna (Inglês)", grade: "8.0" },
-    { name: "Ensino Religioso", grade: "9.0" },
-    { name: "Filosofia", grade: "8.5" },
-    { name: "Sociologia", grade: "7.0" },
-    { name: "Trabalho e Tecnologia", grade: "10.0" },
-    { name: "Diversidade Cultural", grade: "9.5" }
+    { name: "HISTÓRIA", grade: "9.0" },
+    { name: "GEOGRAFIA", grade: "8.5" },
+    { name: "CIÊNCIAS NATURAIS ", grade: "9.5" },
+    { name: "MATEMÁTICA", grade: "8.0" },
+    { name: "EDUCAÇÃO FÍSICA", grade: "7.5" },
+    { name: "ARTE", grade: "10.0" },
+    { name: "LÍNGUA PORTUGUESA", grade: "9.0" },
+    { name: "", grade: "8.0" },
+    { name: "", grade: "9.0" },
+    { name: "", grade: "8.5" },
+    { name: "", grade: "7.0" },
+    { name: "", grade: "10.0" },
+    { name: "", grade: "9.5" }
   ];
 
   return (
@@ -75,7 +75,7 @@ export function ResultsTable() {
                       <td className="px-6 py-3">
                         <input
                           type="text"
-                          defaultValue="Resolução SE nº18489/2010"
+                          defaultValue="Resolução SE nº 14/2010"
                           disabled={rowTypes[year] === 'Notas'}
                           className="w-full bg-transparent px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-b border-primary/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                         />
@@ -97,10 +97,10 @@ export function ResultsTable() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant/10">
-                  {subjects.map((subject) => (
-                    <tr key={subject.name} className="hover:bg-surface-container transition-colors">
+                  {subjects.map((subject, index) => (
+                    <tr key={index} className="hover:bg-surface-container transition-colors">
                       <td className="px-6 py-3 font-medium text-sm text-on-surface">
-                        <input type="text" defaultValue={subject.name} className="w-full bg-transparent focus:outline-none focus:border-b border-primary/30" />
+                        <input type="text" defaultValue={subject.name} placeholder="Nome da disciplina..." className="w-full bg-transparent focus:outline-none focus:border-b border-primary/30" />
                       </td>
                       {[1, 2, 3, 4, 5].map(year => {
                         const isResumo = rowTypes[year] !== 'Notas';
@@ -113,8 +113,8 @@ export function ResultsTable() {
                               disabled={isResumo}
                               onFocus={(e) => e.target.select()}
                               className={`px-2 py-1 rounded-full text-[11px] font-bold w-[76px] text-center focus:outline-none transition-all shadow-sm ${isResumo
-                                  ? "bg-surface-variant/50 text-on-surface/50 cursor-not-allowed"
-                                  : "bg-secondary-container text-on-secondary-container focus:ring-2 focus:ring-primary focus:bg-white"
+                                ? "bg-surface-variant/50 text-on-surface/50 cursor-not-allowed"
+                                : "bg-secondary-container text-on-secondary-container focus:ring-2 focus:ring-primary focus:bg-white"
                                 }`}
                             />
                           </td>
