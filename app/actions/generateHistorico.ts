@@ -40,28 +40,23 @@ export async function generateHistoricoAction(formData: FormData): Promise<{ bas
     const disciplinas = [];
     for (let i = 0; i < 13; i++) {
         const nome = formData.get(`disciplina_${i}_nome`)?.toString() || " ";
-        disciplinas.push({
-           nome: nome
-        });
+        let rowObj: Record<string, string> = { nome: nome };
+        
+        for (let y = 1; y <= 5; y++) {
+            const type = formData.get(`res_type_${y}`);
+            if (type === "Resolução") {
+                if (i === 0) {
+                    rowObj[`nota_${y}`] = (formData.get(`res_text_${y}`)?.toString() || "Resolução") + " |MERGE_START_VERT";
+                } else {
+                    rowObj[`nota_${y}`] = " |MERGE_CONTINUE";
+                }
+            } else {
+                rowObj[`nota_${y}`] = formData.get(`disciplina_${i}_nota_${y}`)?.toString() || " ";
+            }
+        }
+        disciplinas.push(rowObj);
     }
     data["disciplinas"] = disciplinas;
-
-    for (let y = 1; y <= 5; y++) {
-        const type = formData.get(`res_type_${y}`);
-        if (type === "Resolução") {
-            const resText = formData.get(`res_text_${y}`)?.toString() || "";
-            data[`exibirNotas_${y}`] = false;
-            data[`exibirResolucao_${y}`] = [{ TEXTO_DA_RESOLUCAO: resText }];
-        } else {
-            const notasAno = [];
-            for (let i = 0; i < 13; i++) {
-                let nota = formData.get(`disciplina_${i}_nota_${y}`)?.toString() || " ";
-                notasAno.push({ nota: nota });
-            }
-            data[`exibirNotas_${y}`] = [{ disciplinas: notasAno }];
-            data[`exibirResolucao_${y}`] = false;
-        }
-    }
     
     const obsList: { text: string }[] = [];
     let obsText = "";
@@ -95,6 +90,53 @@ export async function generateHistoricoAction(formData: FormData): Promise<{ bas
     }
     
     doc.render(data);
+
+    // Mágica do XML: Mesclar as células de Resolução Verticalmente e Limpar as bordas horizontais cruzadas
+    const xmlFile = doc.getZip().file("word/document.xml");
+    if (xmlFile) {
+        let xml = xmlFile.asText();
+
+        // 1) Onde for START_VERT: marca a célula para iniciar a mesclagem vertical
+        xml = xml.replace(
+            /<w:tc>(?:(?!<\/w:tc>)[\s\S])*?\|MERGE_START_VERT(?:(?!<\/w:tc>)[\s\S])*?<\/w:tc>/g,
+            (match) => {
+                let m = match.replace(/\|MERGE_START_VERT/g, "");
+                m = m.replace(/<w:tcPr>([\s\S]*?)<\/w:tcPr>/, (tcPrMatch, inner) => {
+                    let n = inner.replace(/<w:vMerge[^>]*>/g, "");
+                    n = n.replace(/<w:tcBorders>[\s\S]*?<\/w:tcBorders>/g, "");
+                    n = n.replace(/<w:textDirection[^>]*>/g, "");
+                    n = n.replace(/<w:vAlign[^>]*>/g, "");
+                    return `<w:tcPr>${n}<w:vMerge w:val="restart"/><w:tcBorders><w:top w:val="nil"/><w:left w:val="single" w:sz="4" w:space="0" w:color="auto"/><w:bottom w:val="nil"/><w:right w:val="single" w:sz="4" w:space="0" w:color="auto"/></w:tcBorders><w:textDirection w:val="btLr"/><w:vAlign w:val="center"/></w:tcPr>`;
+                });
+                return m;
+            }
+        );
+
+        // 2) Onde for CONTINUE: apaga TUDO que houver e mescla a célula junto a de cima.
+        xml = xml.replace(
+            /<w:tc>(?:(?!<\/w:tc>)[\s\S])*?\|MERGE_CONTINUE(?:(?!<\/w:tc>)[\s\S])*?<\/w:tc>/g,
+            (match) => {
+                let m = match;
+                m = m.replace(/<w:tcPr>([\s\S]*?)<\/w:tcPr>/, (tcPrMatch, inner) => {
+                    let n = inner.replace(/<w:vMerge[^>]*>/g, "");
+                    n = n.replace(/<w:tcBorders>[\s\S]*?<\/w:tcBorders>/g, "");
+                    n = n.replace(/<w:vAlign[^>]*>/g, "");
+                    return `<w:tcPr>${n}<w:vMerge/><w:tcBorders><w:top w:val="nil"/><w:left w:val="single" w:sz="4" w:space="0" w:color="auto"/><w:bottom w:val="nil"/><w:right w:val="single" w:sz="4" w:space="0" w:color="auto"/></w:tcBorders><w:vAlign w:val="center"/></w:tcPr>`;
+                });
+                
+                let tcPrEnd = m.indexOf("</w:tcPr>");
+                if (tcPrEnd !== -1) {
+                    let tcPr = m.substring(0, tcPrEnd + 9);
+                    // Deixa a célula completamente vazia visualmente
+                    return `${tcPr}<w:p><w:pPr><w:jc w:val="center"/></w:pPr></w:p></w:tc>`;
+                }
+                return m;
+            }
+        );
+
+        doc.getZip().file("word/document.xml", xml);
+    }
+
     const buf = doc.getZip().generate({
       type: "nodebuffer",
       compression: "DEFLATE",
