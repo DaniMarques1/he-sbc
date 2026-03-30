@@ -1,0 +1,67 @@
+﻿placeholder,section,type,form,description
+{EMEB},0,string,Nome da EMEB,Nome da EMEB.
+{ENDERECO_EMEB},0,string,Endereço,"Endereço da EMEB, com logradouro, número etc"
+{CEP_EMEB},0,string,CEP,CEP da EMEB
+{TEL_1},0,string,Telefone 1,Telefone Principal da EMEB
+{TEL_2},0,string,Telefone 2,Telefone Secundário da EMEB
+{ATO_DE_CRIACAO},0,string,Ato de Criação da EMEB,Ato de criação da EMEB
+{RM},1,int,RM,Registro de Matrícula do(a) estudante
+{NOME_ALUNO},1,string,Nome do(a) Estudante,Nome do(a) estudante
+{MUNICIPIO},1,string,Município de Nascimento,Município de nascimento do(a) estudante
+{UF},1,string,UF,Estado da federação de nascimento do(a) estudante
+{NACION},1,string,Nacionalidade,Nacionalidade do(a) estudante
+{D_N},1,string,Data de Nascimento,Dia do nascimento
+{M_N},1,string,Data de Nascimento,Mês do nascimento
+{A_N},1,string,Data de Nascimento,Ano do nascimento
+{RA},1,string,R.A ,"R.A do(a) estudante, formatado"
+{UF_RA},1,string,UF do R.A,UF do R.A do(a) estudante
+{#disciplinas} {nome} {/disciplinas},2,list,Disciplinas Estudadas,"Lista de componentes curriculares (matérias), precisa criar 13 linhas"
+{#exibirNotas} {#disciplinas} {nota} {/disciplinas} {/exibirNotas} ,2,list,Notas das Disciplinas,Exibe as notas das disciplinas
+{#exibirResolucao} {TEXTO_DA_RESOLUCAO} {/exibirResolucao},2,string,,"Exibe a resolução da SE, no caso de EMEB"
+{#disciplinas_diversificadas} {nome} {#disciplinas_diversificadas},2,list,Disciplinas Diversificadas,"Lista de componentes curriculares diversificados (matérias),"
+{#exibirResolucaoEducarMais} {TEXTO_EDUCAR_MAIS} {/ exibirResolucaoEducarMais },2,string,,
+{HMAIS_1},3,string,Horas totais 1º ano EDUCAR MAIS.,"Horas das matéiras diversificadas do EDUCAR MAIS, variáveis do 1 ao 5"
+{HMAIS_2},3,string,Horas totais 2º ano EDUCAR MAIS.,"Horas das matéiras diversificadas do EDUCAR MAIS, variáveis do 1 ao 5"
+{HMAIS_3},3,string,Horas totais 3º ano EDUCAR MAIS.,"Horas das matéiras diversificadas do EDUCAR MAIS, variáveis do 1 ao 5"
+{HMAIS_4},3,string,Horas totais 4º ano EDUCAR MAIS.,"Horas das matéiras diversificadas do EDUCAR MAIS, variáveis do 1 ao 5"
+{HMAIS_5},3,string,Horas totais 5º ano EDUCAR MAIS.,"Horas das matéiras diversificadas do EDUCAR MAIS, variáveis do 1 ao 5"
+{HORAS_1},3,string,Horas totais 1º ano.,"Horas de conclusão, variáveis do 1 ao 5"
+{HORAS_2},3,string,Horas totais 2º ano.,"Horas de conclusão, variáveis do 1 ao 5"
+{HORAS_3},3,string,Horas totais 3º ano.,"Horas de conclusão, variáveis do 1 ao 5"
+{HORAS_4},3,string,Horas totais 4º ano.,"Horas de conclusão, variáveis do 1 ao 5"
+{HORAS_5},3,string,Horas totais 5º ano.,"Horas de conclusão, variáveis do 1 ao 5"
+{ANO_1},3,int,Ano de Conclusão ou Transf. 1º ano,"Ano de conclusão do 1º ano, variáveis do 1 ao 5"
+{ANO_2},3,int,Ano de Conclusão ou Transf. 2º ano,"Ano de conclusão do 2º ano, variáveis do 1 ao 5"
+{ANO_3},3,int,Ano de Conclusão ou Transf. 3º ano,"Ano de conclusão do 3º ano, variáveis do 1 ao 5"
+{ANO_4},3,int,Ano de Conclusão ou Transf. 4º ano,"Ano de conclusão do 4º ano, variáveis do 1 ao 5"
+{ANO_5},3,int,Ano de Conclusão ou Transf. 5º ano,"Ano de conclusão do 5º ano, variáveis do 1 ao 5"
+{ESCOLA_1},3,string,Escola de Conclusão ou Transf. 1º ano,"Escola de conclusão do 1º ano, variáveis do 1 ao 5"
+{ESCOLA_2},3,string,Escola de Conclusão ou Transf. 2º ano,"Escola de conclusão do 1º ano, variáveis do 1 ao 5"
+{ESCOLA_3},3,string,Escola de Conclusão ou Transf. 3º ano,"Escola de conclusão do 1º ano, variáveis do 1 ao 5"
+{ESCOLA_4},3,string,Escola de Conclusão ou Transf. 4º ano,"Escola de conclusão do 1º ano, variáveis do 1 ao 5"
+{ESCOLA_5},3,string,Escola de Conclusão ou Transf. 5º ano,"Escola de conclusão do 1º ano, variáveis do 1 ao 5"
+{MUNIC_1},3,string,Município de Conclusão ou Transf. 1º ano,"Município de conclusão do 1º ano, variáveis do 1 ao 5"
+{MUNIC_2},3,string,Município de Conclusão ou Transf. 2º ano,"Município de conclusão do 1º ano, variáveis do 1 ao 5"
+{MUNIC_3},3,string,Município de Conclusão ou Transf. 3º ano,"Município de conclusão do 1º ano, variáveis do 1 ao 5"
+{MUNIC_4},3,string,Município de Conclusão ou Transf. 4º ano,"Município de conclusão do 1º ano, variáveis do 1 ao 5"
+{MUNIC_5},3,string,Município de Conclusão ou Transf. 5º ano,"Município de conclusão do 1º ano, variáveis do 1 ao 5"
+{UF_1},3,string,UF Conclusão ou Transf. 1º ano,"Estado da federação  de conclusão do 1º ano, variáveis do 1 ao 5"
+{UF_2},3,string,UF Conclusão ou Transf. 2º ano,"Estado da federação  de conclusão do 1º ano, variáveis do 1 ao 5"
+{UF_3},3,string,UF Conclusão ou Transf. 3º ano,"Estado da federação  de conclusão do 1º ano, variáveis do 1 ao 5"
+{UF_4},3,string,UF Conclusão ou Transf. 4º ano,"Estado da federação  de conclusão do 1º ano, variáveis do 1 ao 5"
+{UF_5},3,string,UF Conclusão ou Transf. 5º ano,"Estado da federação  de conclusão do 1º ano, variáveis do 1 ao 5"
+{DATA_MATR} ,4,string,Data da Matrícula,Data da matrícula. Usado na transferência
+{DATA_TRANSF},4,string,Data da Transferência,Data da transferência. Usado na transferência
+{CLASSE} ,4,string,Classe,Nº da classe no SED. Usado na transferência
+{TURNO},4,string,Turno,Turno. Usado na transferência
+{CICLO},4,string,Ciclo,Ciclo (I ou II). Usado na transferência
+{ANO_TRANSF}      ,4,string,"Ano (1º, 2º, etc)","Ano de transferência (1º, 2º etc). Usado na transferência"
+{TURMA},4,string,Turma,Turma do(a) estudante. Usado na transferência
+{FALTAS},4,int,Faltas,Número de faltas até a transferência. Usado na transferência.
+{DIAS_LET},4,int,Dias Letivos,Número de dias letivos até a transferência. Usado na transferência.
+{#exibirResolucaoTransf} {TEXTO_DA_RESOLUCAO_TRANSF} {/exibirResolucaoTransf},4,string,,Resolução do rendimento nos trismestres. Usado na transferência.
+{OBS},5,list,Lista de Observações,Observações do histórico.
+{ANO_HISTORICO},5,string,,"Ano de conclusão/transferência do estudante no presente histórico (ex: 1º, 2º)"
+{ANO_CORRENTE},5,int,,"Ano (data. Ex: 2024, 2025) do histórico."
+{PROSSEGUIMENTO} ,5,string,,Define se conclusão ou transferência (no próximo ano/no mesmo ano)
+{DATA},5,string,Data,Data da confecção do histórico.

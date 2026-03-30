@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export function ResultsTable() {
+export function ResultadosEnsinoFundamental() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [rowTypes, setRowTypes] = useState<Record<number, string>>({
     1: 'Resolução',
@@ -45,7 +45,7 @@ export function ResultsTable() {
             </span>
           </div>
         </div>
-        {isExpanded && (
+        <div className={isExpanded ? "block" : "hidden"}>
           <div className="flex flex-col gap-6">
             <div className="overflow-x-auto rounded-xl bg-white shadow-sm border border-outline-variant/10">
               <table className="w-full text-left border-collapse min-w-[500px]">
@@ -64,6 +64,7 @@ export function ResultsTable() {
                       </td>
                       <td className="px-6 py-3">
                         <select
+                          name={`res_type_${year}`}
                           value={rowTypes[year] || 'Resolução'}
                           onChange={(e) => setRowTypes({ ...rowTypes, [year]: e.target.value })}
                           className="bg-secondary-container text-on-secondary-container px-3 py-2 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-all w-full cursor-pointer"
@@ -75,6 +76,7 @@ export function ResultsTable() {
                       <td className="px-6 py-3">
                         <input
                           type="text"
+                          name={`res_text_${year}`}
                           defaultValue="Resolução SE nº 14/2010"
                           disabled={rowTypes[year] === 'Notas'}
                           className="w-full bg-transparent px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-b border-primary/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
@@ -100,7 +102,7 @@ export function ResultsTable() {
                   {subjects.map((subject, index) => (
                     <tr key={index} className="hover:bg-surface-container transition-colors">
                       <td className="px-6 py-3 font-medium text-sm text-on-surface">
-                        <input type="text" defaultValue={subject.name} placeholder="Nome da disciplina..." className="w-full bg-transparent focus:outline-none focus:border-b border-primary/30" />
+                        <input type="text" name={`disciplina_${index}_nome`} defaultValue={subject.name} placeholder="Nome da disciplina..." className="w-full bg-transparent focus:outline-none focus:border-b border-primary/30" />
                       </td>
                       {[1, 2, 3, 4, 5].map(year => {
                         const isResumo = rowTypes[year] !== 'Notas';
@@ -109,6 +111,7 @@ export function ResultsTable() {
                             <input
                               key={`input-${year}-${isResumo}`}
                               type="text"
+                              name={`disciplina_${index}_nota_${year}`}
                               defaultValue={isResumo ? "Resolução" : "10"}
                               disabled={isResumo}
                               onFocus={(e) => e.target.select()}
@@ -126,7 +129,7 @@ export function ResultsTable() {
               </table>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </section>
   );

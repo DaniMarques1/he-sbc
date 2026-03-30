@@ -16,7 +16,7 @@ const defaultObs: Observation[] = [
   { id: '9', title: "", text: "As Fichas de Rendimento Escolar do aluno correspondentes aos estudos realizados no ano letivo em curso (e no continuum 2020/2021) seguem anexas ao Histórico Escolar.", checked: true }
 ];
 
-export function Observations() {
+export function Observacoes() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [is2020Expanded, setIs2020Expanded] = useState(false);
   const [observations, setObservations] = useState<Observation[]>(defaultObs);
@@ -46,15 +46,18 @@ export function Observations() {
       <div className="flex-1 flex flex-col gap-1">
         <input
           type="text"
+          name={`obs_title_${obs.id}`}
           value={obs.title}
           onChange={(e) => {
             const newObs = [...observations];
             newObs[index].title = e.target.value;
             setObservations(newObs);
           }}
+          disabled={!obs.checked}
           className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none focus:border-b border-primary/30 pb-0.5 transition-colors"
         />
         <textarea
+          name={`obs_text_${obs.id}`}
           value={obs.text}
           onChange={(e) => {
             const newObs = [...observations];
@@ -103,7 +106,7 @@ export function Observations() {
             </span>
           </div>
         </div>
-        {isExpanded && (
+        <div className={isExpanded ? "block" : "hidden"}>
           <div className="flex flex-col gap-5">
             {observations.slice(0, 3).map((obs, index) => renderObservation(obs, index))}
 
@@ -145,11 +148,11 @@ export function Observations() {
                   </div>
                 </div>
 
-                {is2020Expanded && (
+                <div className={is2020Expanded ? "block" : "hidden"}>
                   <div className="p-4 flex flex-col gap-5 border-t border-outline-variant/30">
                     {group2020.map((obs, localIndex) => renderObservation(obs, localIndex + 3))}
                   </div>
-                )}
+                </div>
               </div>
             )}
 
@@ -163,7 +166,7 @@ export function Observations() {
               Adicionar Observação
             </button>
           </div>
-        )}
+        </div>
       </div>
     </section>
   );

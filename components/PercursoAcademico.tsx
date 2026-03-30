@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export function AcademicPath() {
+export function PercursoAcademico() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [transferIndex, setTransferIndex] = useState<number | null>(null);
   const [conclusionIndex, setConclusionIndex] = useState<number | null>(null);
@@ -67,14 +67,15 @@ export function AcademicPath() {
                         <input type="text" defaultValue={record.year} disabled={isAnyDisabled} className={inputClass} />
                       </td>
                       <td className="px-2 py-3">
-                        <input type="text" defaultValue={record.calendar} disabled={isAnyDisabled} className={inputClass} />
+                        <input type="text" name={`ANO_${index + 1}`} defaultValue={record.calendar} disabled={isAnyDisabled} className={inputClass} />
                       </td>
                       <td className="px-2 py-3">
-                        <input type="text" defaultValue={record.hours} disabled={isAnyDisabled} className={inputClass} />
+                        <input type="text" name={`HORAS_${index + 1}`} defaultValue={record.hours} disabled={isAnyDisabled} className={inputClass} />
                       </td>
                       <td className="px-2 py-3 text-center">
                         <input
                           type="checkbox"
+                          name={`CONCLUSAO_${index + 1}`}
                           checked={conclusionIndex === index}
                           onChange={() => {
                             const newIndex = conclusionIndex === index ? null : index;
@@ -89,6 +90,7 @@ export function AcademicPath() {
                       <td className="px-2 py-3 text-center">
                         <input
                           type="checkbox"
+                          name={`TRANSF_${index + 1}`}
                           checked={transferIndex === index}
                           onChange={() => {
                             const newIndex = transferIndex === index ? null : index;
@@ -103,6 +105,7 @@ export function AcademicPath() {
                       <td className="px-2 py-3 text-center">
                         <input
                           type="checkbox"
+                          name={`EDUCARMAIS_${index + 1}`}
                           checked={isEducarMais}
                           onChange={() => setEducarMaisChecked({ ...educarMaisChecked, [index]: !isEducarMais })}
                           disabled={isAnyDisabled}
@@ -116,6 +119,7 @@ export function AcademicPath() {
                             <input
                               key={`em-on-${index}`}
                               type="text"
+                              name={`HMAIS_${index + 1}`}
                               defaultValue="600h"
                               disabled={isAnyDisabled}
                               className={inputClass}
@@ -125,6 +129,7 @@ export function AcademicPath() {
                             <input
                               key={`em-off-${index}`}
                               type="text"
+                              name={`HMAIS_${index + 1}`}
                               value=""
                               disabled={true}
                               className={inputClass}
@@ -133,13 +138,13 @@ export function AcademicPath() {
                         </td>
                       )}
                       <td className="px-2 py-3">
-                        <input type="text" defaultValue={record.school} disabled={isAnyDisabled} className={inputClass} />
+                        <input type="text" name={`ESCOLA_${index + 1}`} defaultValue={record.school} disabled={isAnyDisabled} className={inputClass} />
                       </td>
                       <td className="px-2 py-3">
-                        <input type="text" defaultValue={record.city} disabled={isAnyDisabled} className={inputClass} />
+                        <input type="text" name={`MUNIC_${index + 1}`} defaultValue={record.city} disabled={isAnyDisabled} className={inputClass} />
                       </td>
                       <td className="px-2 py-3">
-                        <input type="text" defaultValue={record.state} disabled={isAnyDisabled} className={inputClass} />
+                        <input type="text" name={`UF_${index + 1}`} defaultValue={record.state} disabled={isAnyDisabled} className={inputClass} />
                       </td>
                     </tr>
                   );
