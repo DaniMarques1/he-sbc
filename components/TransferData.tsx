@@ -8,7 +8,7 @@ export function TransferData() {
   return (
     <section className="bg-white rounded-2xl md:rounded-full overflow-hidden shadow-sm border border-outline-variant/10">
       <div className="px-4 md:px-8 py-4 md:py-6">
-        <div 
+        <div
           className={`flex justify-between items-center cursor-pointer group select-none ${isExpanded ? 'mb-4 md:mb-6' : ''}`}
           onClick={() => setIsExpanded(!isExpanded)}
         >
@@ -24,51 +24,51 @@ export function TransferData() {
         </div>
         {isExpanded && (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-          <div className="space-y-1">
-            <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Data de Matrícula</label>
-            <input type="text" defaultValue="02/02/2024" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none" />
+            <div className="space-y-1">
+              <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Data de Matrícula</label>
+              <input type="text" defaultValue="05/02/2026" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none" />
+            </div>
+            <div className="space-y-1">
+              <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Data Transferência</label>
+              <input type="text" placeholder="--/--/----" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none placeholder:text-on-surface/40" />
+            </div>
+            <div className="space-y-1">
+              <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Classe</label>
+              <input type="text" placeholder="1º Ano" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none placeholder:text-on-surface/40" />
+            </div>
+            <div className="space-y-1">
+              <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Turma</label>
+              <input type="text" placeholder="A" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none placeholder:text-on-surface/40" />
+            </div>
+            <div className="space-y-1">
+              <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Período/Turno</label>
+              <input type="text" placeholder="Manhã" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none placeholder:text-on-surface/40" />
+            </div>
+            <div className="space-y-1">
+              <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Ciclo</label>
+              <input type="text" placeholder="2º Ciclo" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none placeholder:text-on-surface/40" />
+            </div>
+            <div className="space-y-1">
+              <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Ano</label>
+              <input type="text" placeholder="6º Ano" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none placeholder:text-on-surface/40" />
+            </div>
+            <div className="space-y-1">
+              <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Total Faltas</label>
+              <input type="text" placeholder="02" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none placeholder:text-on-surface/40" />
+            </div>
+            <div className="space-y-1">
+              <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Dias Letivos</label>
+              <input type="text" placeholder="200" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none placeholder:text-on-surface/40" />
+            </div>
+            <div className="space-y-1">
+              <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Até o</label>
+              <select className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none cursor-pointer">
+                <option value="1º Trimestre">1º Trimestre</option>
+                <option value="2º Trimestre">2º Trimestre</option>
+                <option value="3º Trimestre">3º Trimestre</option>
+              </select>
+            </div>
           </div>
-          <div className="space-y-1">
-            <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Data Transferência</label>
-            <input type="text" defaultValue="--/--/----" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none" />
-          </div>
-          <div className="space-y-1">
-            <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Classe</label>
-            <input type="text" defaultValue="6º Ano" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none" />
-          </div>
-          <div className="space-y-1">
-            <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Turma</label>
-            <input type="text" defaultValue="A" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none" />
-          </div>
-          <div className="space-y-1">
-            <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Período/Turno</label>
-            <input type="text" defaultValue="Manhã" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none" />
-          </div>
-          <div className="space-y-1">
-            <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Ciclo</label>
-            <input type="text" defaultValue="2º Ciclo" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none" />
-          </div>
-          <div className="space-y-1">
-            <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Ano</label>
-            <input type="text" defaultValue="6º Ano" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none" />
-          </div>
-          <div className="space-y-1">
-            <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Total Faltas</label>
-            <input type="text" defaultValue="02" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none" />
-          </div>
-          <div className="space-y-1">
-            <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Dias Letivos</label>
-            <input type="text" defaultValue="200" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none" />
-          </div>
-          <div className="space-y-1">
-            <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Até o</label>
-            <select className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none cursor-pointer">
-              <option value="1º Trimestre">1º Trimestre</option>
-              <option value="2º Trimestre">2º Trimestre</option>
-              <option value="3º Trimestre">3º Trimestre</option>
-            </select>
-          </div>
-        </div>
         )}
       </div>
     </section>
