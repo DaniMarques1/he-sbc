@@ -30,7 +30,7 @@ export function DadosUnidadeEscolar() {
             </div>
             <div className="md:col-span-2 space-y-1">
               <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Endereço Completo</label>
-              <input type="text" name="ENDERECO_EMEB" defaultValue="Estrada Henrique Rosa, 411 - Riacho Grande - São Bernardo do Campo - SP" className="text-on-surface font-medium border-b border-outline-variant/20 pb-1 bg-transparent w-full focus:outline-none" />
+              <input type="text" name="ENDERECO_EMEB" defaultValue="Estrada Henrique Rosa, 411 - Riacho Grande - SBC - SP" className="text-on-surface font-medium border-b border-outline-variant/20 pb-1 bg-transparent w-full focus:outline-none" />
             </div>
             <div className="space-y-1">
               <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">CEP</label>

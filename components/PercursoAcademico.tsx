@@ -10,11 +10,11 @@ export function PercursoAcademico() {
   const isAnyEducarMaisChecked = Object.values(educarMaisChecked).some(Boolean);
 
   const records = [
-    { year: "1º Ano", hours: "1000h", calendar: "2019", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" },
-    { year: "2º Ano", hours: "1000h", calendar: "2020", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" },
-    { year: "3º Ano", hours: "1000h", calendar: "2021", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" },
-    { year: "4º Ano", hours: "1000h", calendar: "2022", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" },
-    { year: "5º Ano", hours: "1000h", calendar: "2023", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" }
+    { year: "1º Ano", hours: "1000", calendar: "2019", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" },
+    { year: "2º Ano", hours: "1000", calendar: "2020", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" },
+    { year: "3º Ano", hours: "1000", calendar: "2021", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" },
+    { year: "4º Ano", hours: "1000", calendar: "2022", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" },
+    { year: "5º Ano", hours: "1000", calendar: "2023", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" }
   ];
 
   return (
@@ -95,7 +95,10 @@ export function PercursoAcademico() {
                           onChange={() => {
                             const newIndex = transferIndex === index ? null : index;
                             setTransferIndex(newIndex);
-                            if (newIndex !== null) setConclusionIndex(null);
+                            if (newIndex !== null) {
+                              setConclusionIndex(null);
+                              window.dispatchEvent(new CustomEvent("onTransfMarked"));
+                            }
                           }}
                           disabled={isAnyDisabled}
                           className="w-4 h-4 cursor-pointer accent-primary disabled:opacity-40"

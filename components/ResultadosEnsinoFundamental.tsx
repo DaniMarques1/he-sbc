@@ -20,12 +20,12 @@ export function ResultadosEnsinoFundamental() {
     { name: "EDUCAÇÃO FÍSICA", grade: "7.5" },
     { name: "ARTE", grade: "10.0" },
     { name: "LÍNGUA PORTUGUESA", grade: "9.0" },
-    { name: "", grade: "8.0" },
-    { name: "", grade: "9.0" },
-    { name: "", grade: "8.5" },
-    { name: "", grade: "7.0" },
-    { name: "", grade: "10.0" },
-    { name: "", grade: "9.5" }
+    { name: "", grade: "" },
+    { name: "", grade: "" },
+    { name: "", grade: "" },
+    { name: "", grade: "" },
+    { name: "", grade: "" },
+    { name: "", grade: "" }
   ];
 
   return (
@@ -112,7 +112,8 @@ export function ResultadosEnsinoFundamental() {
                               key={`input-${year}-${isResumo}`}
                               type="text"
                               name={`disciplina_${index}_nota_${year}`}
-                              defaultValue={isResumo ? "Resolução" : "10"}
+                              defaultValue={isResumo ? "Resolução" : ""}
+                              placeholder={isResumo ? "" : "Digite"}
                               disabled={isResumo}
                               onFocus={(e) => e.target.select()}
                               className={`px-2 py-1 rounded-full text-[11px] font-bold w-[76px] text-center focus:outline-none transition-all shadow-sm ${isResumo

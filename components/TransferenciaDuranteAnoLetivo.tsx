@@ -1,9 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export function TransferenciaDuranteAnoLetivo() {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isEmpty, setIsEmpty] = useState(true);
+
+  useEffect(() => {
+    const handleTransfMarked = () => {
+      setIsEmpty(false);
+      setIsExpanded(true); // Optional: Expand the section when it automatically unchecks
+    };
+    
+    window.addEventListener("onTransfMarked", handleTransfMarked);
+    return () => window.removeEventListener("onTransfMarked", handleTransfMarked);
+  }, []);
 
   return (
     <section className="bg-white rounded-2xl md:rounded-full overflow-hidden shadow-sm border border-outline-variant/10">
@@ -23,46 +34,58 @@ export function TransferenciaDuranteAnoLetivo() {
           </div>
         </div>
         <div className={isExpanded ? "block" : "hidden"}>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+          <div className="mb-6 border-b border-outline-variant/30 pb-4">
+            <label className="inline-flex items-center gap-2 text-sm font-medium text-on-surface cursor-pointer p-2 hover:bg-surface-variant/30 rounded-lg transition">
+              <input
+                type="checkbox"
+                name="SEM_TRANSF_MEIO_ANO"
+                checked={isEmpty}
+                onChange={(e) => setIsEmpty(e.target.checked)}
+                className="w-4 h-4 rounded text-primary focus:ring-primary border-outline"
+              />
+              Sem transferência / Enviar Vazio
+            </label>
+          </div>
+          <div className={`grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 ${isEmpty ? "opacity-50 pointer-events-none grayscale" : ""}`}>
             <div className="space-y-1">
               <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Data de Matrícula</label>
-              <input type="text" name="DATA_MATR" defaultValue="05/02/2026" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none" />
+              <input type="text" disabled={isEmpty} name="DATA_MATR" defaultValue="05/02/2026" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none" />
             </div>
             <div className="space-y-1">
               <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Data Transferência</label>
-              <input type="text" name="DATA_TRANSF" placeholder="--/--/----" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none placeholder:text-on-surface/40" />
+              <input type="text" disabled={isEmpty} name="DATA_TRANSF" placeholder="--/--/----" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none placeholder:text-on-surface/40" />
             </div>
             <div className="space-y-1">
               <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Classe</label>
-              <input type="text" name="CLASSE" placeholder="1º Ano" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none placeholder:text-on-surface/40" />
+              <input type="text" disabled={isEmpty} name="CLASSE" placeholder="1º Ano" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none placeholder:text-on-surface/40" />
             </div>
             <div className="space-y-1">
               <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Turma</label>
-              <input type="text" name="TURMA" placeholder="A" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none placeholder:text-on-surface/40" />
+              <input type="text" disabled={isEmpty} name="TURMA" placeholder="A" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none placeholder:text-on-surface/40" />
             </div>
             <div className="space-y-1">
               <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Período/Turno</label>
-              <input type="text" name="TURNO" placeholder="Manhã" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none placeholder:text-on-surface/40" />
+              <input type="text" disabled={isEmpty} name="TURNO" placeholder="Manhã" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none placeholder:text-on-surface/40" />
             </div>
             <div className="space-y-1">
               <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Ciclo</label>
-              <input type="text" name="CICLO" placeholder="2º Ciclo" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none placeholder:text-on-surface/40" />
+              <input type="text" disabled={isEmpty} name="CICLO" placeholder="2º Ciclo" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none placeholder:text-on-surface/40" />
             </div>
             <div className="space-y-1">
               <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Ano</label>
-              <input type="text" name="ANO_TRANSF" placeholder="6º Ano" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none placeholder:text-on-surface/40" />
+              <input type="text" disabled={isEmpty} name="ANO_TRANSF" placeholder="6º Ano" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none placeholder:text-on-surface/40" />
             </div>
             <div className="space-y-1">
               <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Total Faltas</label>
-              <input type="text" name="FALTAS" placeholder="02" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none placeholder:text-on-surface/40" />
+              <input type="text" disabled={isEmpty} name="FALTAS" placeholder="02" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none placeholder:text-on-surface/40" />
             </div>
             <div className="space-y-1">
               <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Dias Letivos</label>
-              <input type="text" name="DIAS_LET" placeholder="200" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none placeholder:text-on-surface/40" />
+              <input type="text" disabled={isEmpty} name="DIAS_LET" placeholder="200" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none placeholder:text-on-surface/40" />
             </div>
             <div className="space-y-1">
               <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Até o</label>
-              <select name="ATE_TRIMESTRE" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none cursor-pointer">
+              <select disabled={isEmpty} name="ATE_TRIMESTRE" className="text-sm font-semibold text-on-surface bg-transparent w-full focus:outline-none cursor-pointer">
                 <option value="1º Trimestre">1º Trimestre</option>
                 <option value="2º Trimestre">2º Trimestre</option>
                 <option value="3º Trimestre">3º Trimestre</option>

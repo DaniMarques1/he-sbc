@@ -36,22 +36,81 @@ export async function generateHistoricoAction(formData: FormData): Promise<{ bas
     formData.forEach((value, key) => {
       data[key] = value.toString();
     });
+
+    let transferYear = -1;
+    let conclusionYear = -1;
+    for (let i = 1; i <= 5; i++) {
+        if (formData.get(`TRANSF_${i}`) === "on") transferYear = i;
+        if (formData.get(`CONCLUSAO_${i}`) === "on") conclusionYear = i;
+    }
+
+    if (conclusionYear > 0) {
+        data["PROSSEGUIMENTO"] = "próximo ano";
+    } else if (transferYear > 0) {
+        data["PROSSEGUIMENTO"] = "mesmo ano";
+        
+        // Adiciona "Transfere-se" na mesma célula da escola
+        let currentEscola = data[`ESCOLA_${transferYear}`] || "";
+        if (currentEscola) {
+            data[`ESCOLA_${transferYear}`] = currentEscola + " - Transfere-se";
+        }
+
+        // Carga horária do ano de transferência é inutilizada
+        data[`HORAS_${transferYear}`] = "|MERGE_START_DIAGONAL";
+        data[`HMAIS_${transferYear}`] = "|MERGE_START_DIAGONAL";
+    }
     
+    // Tabela 3 (Percurso) recebe "-" quando está vazio. E a Carga Horária recebe riscado transversal
+    const textFields = ['ANO', 'ESCOLA', 'MUNIC', 'UF'];
+    for (let i = 1; i <= 5; i++) {
+        textFields.forEach(field => {
+            if (!formData.has(`${field}_${i}`) || formData.get(`${field}_${i}`)?.toString().trim() === "") {
+                if (data[`${field}_${i}`] === undefined) {
+                    data[`${field}_${i}`] = "-";
+                }
+            }
+        });
+        const horasFields = ['HORAS', 'HMAIS'];
+        horasFields.forEach(field => {
+            if (!formData.has(`${field}_${i}`) || formData.get(`${field}_${i}`)?.toString().trim() === "") {
+                if (data[`${field}_${i}`] === undefined) {
+                    data[`${field}_${i}`] = "|MERGE_START_DIAGONAL";
+                }
+            }
+        });
+    }
+
     const disciplinas = [];
     for (let i = 0; i < 13; i++) {
         const nome = formData.get(`disciplina_${i}_nome`)?.toString() || " ";
         let rowObj: Record<string, string> = { nome: nome };
         
         for (let y = 1; y <= 5; y++) {
-            const type = formData.get(`res_type_${y}`);
-            if (type === "Resolução") {
+            const isBlankYear = !formData.has(`ANO_${y}`) || formData.get(`ANO_${y}`)?.toString().trim() === "";
+            
+            if (isBlankYear) {
                 if (i === 0) {
-                    rowObj[`nota_${y}`] = (formData.get(`res_text_${y}`)?.toString() || "Resolução") + " |MERGE_START_VERT";
+                    rowObj[`nota_${y}`] = " |MERGE_START_DIAGONAL";
+                } else {
+                    rowObj[`nota_${y}`] = " |MERGE_CONTINUE";
+                }
+            } else if (y === transferYear) {
+                if (i === 0) {
+                    rowObj[`nota_${y}`] = "TRANSFERE-SE |MERGE_START_VERT";
                 } else {
                     rowObj[`nota_${y}`] = " |MERGE_CONTINUE";
                 }
             } else {
-                rowObj[`nota_${y}`] = formData.get(`disciplina_${i}_nota_${y}`)?.toString() || " ";
+                const type = formData.get(`res_type_${y}`);
+                if (type === "Resolução") {
+                    if (i === 0) {
+                        rowObj[`nota_${y}`] = (formData.get(`res_text_${y}`)?.toString() || "Resolução") + " |MERGE_START_VERT";
+                    } else {
+                        rowObj[`nota_${y}`] = " |MERGE_CONTINUE";
+                    }
+                } else {
+                    rowObj[`nota_${y}`] = formData.get(`disciplina_${i}_nota_${y}`)?.toString() || " ";
+                }
             }
         }
         disciplinas.push(rowObj);
@@ -83,10 +142,31 @@ export async function generateHistoricoAction(formData: FormData): Promise<{ bas
        }
     }
     
-    if (data["ATE_TRIMESTRE"]) {
-        data["exibirResolucaoTransf"] = [{ TEXTO_DA_RESOLUCAO_TRANSF: `Até o ${data["ATE_TRIMESTRE"]}` }];
+    const isTransfVazio = formData.get("SEM_TRANSF_MEIO_ANO") === "on";
+    const transfFields = ['CLASSE', 'TURMA', 'DATA_MATR', 'DATA_TRANSF', 'TURNO', 'CICLO', 'ANO_TRANSF', 'FALTAS', 'DIAS_LET', 'ATE_TRIMESTRE'];
+    
+    if (isTransfVazio) {
+        // Campos de cabeçalho ficam vazios (sem risco)
+        const headerFields = ['CLASSE', 'TURMA', 'DATA_MATR', 'DATA_TRANSF', 'TURNO', 'CICLO', 'ANO_TRANSF', 'N_CHAMADA'];
+        headerFields.forEach(field => {
+            data[field] = " ";
+        });
+        // Campos de resultado/tabela recebem o risco
+        const tableFields = ['FALTAS', 'DIAS_LET', 'ATE_TRIMESTRE'];
+        tableFields.forEach(field => {
+            data[field] = "|MERGE_START_DIAGONAL";
+        });
+        data["exibirResolucaoTransf"] = [{ TEXTO_DA_RESOLUCAO_TRANSF: "|MERGE_START_DIAGONAL" }];
     } else {
-        data["exibirResolucaoTransf"] = [];
+        transfFields.forEach(field => {
+            data[field] = formData.get(field)?.toString() || " ";
+        });
+        
+        if (data["ATE_TRIMESTRE"]) {
+            data["exibirResolucaoTransf"] = [{ TEXTO_DA_RESOLUCAO_TRANSF: `Até o ${data["ATE_TRIMESTRE"]}` }];
+        } else {
+            data["exibirResolucaoTransf"] = [];
+        }
     }
     
     doc.render(data);
@@ -121,13 +201,37 @@ export async function generateHistoricoAction(formData: FormData): Promise<{ bas
                     let n = inner.replace(/<w:vMerge[^>]*>/g, "");
                     n = n.replace(/<w:tcBorders>[\s\S]*?<\/w:tcBorders>/g, "");
                     n = n.replace(/<w:vAlign[^>]*>/g, "");
+                    // Limpamos bordas tb, e injetamos vMerge plain
                     return `<w:tcPr>${n}<w:vMerge/><w:tcBorders><w:top w:val="nil"/><w:left w:val="single" w:sz="4" w:space="0" w:color="auto"/><w:bottom w:val="nil"/><w:right w:val="single" w:sz="4" w:space="0" w:color="auto"/></w:tcBorders><w:vAlign w:val="center"/></w:tcPr>`;
                 });
                 
                 let tcPrEnd = m.indexOf("</w:tcPr>");
                 if (tcPrEnd !== -1) {
                     let tcPr = m.substring(0, tcPrEnd + 9);
-                    // Deixa a célula completamente vazia visualmente
+                    return `${tcPr}<w:p><w:pPr><w:jc w:val="center"/></w:pPr></w:p></w:tc>`;
+                }
+                return m;
+            }
+        );
+
+        // 3) START_DIAGONAL: Risco Transversal, limpando conteúdo e forçando merge restart
+        xml = xml.replace(
+            /<w:tc>(?:(?!<\/w:tc>)[\s\S])*?\|MERGE_START_DIAGONAL(?:(?!<\/w:tc>)[\s\S])*?<\/w:tc>/g,
+            (match) => {
+                let m = match.replace(/\|MERGE_START_DIAGONAL/g, "");
+                m = m.replace(/<w:tcPr>([\s\S]*?)<\/w:tcPr>/, (tcPrMatch, inner) => {
+                    let n = inner.replace(/<w:vMerge[^>]*>/g, "");
+                    if (n.indexOf("<w:tcBorders>") !== -1) {
+                        let b = n.replace(/<\/w:tcBorders>/, '<w:tl2br w:val="single" w:sz="4" w:space="0" w:color="auto"/></w:tcBorders>');
+                        return `<w:tcPr>${b}<w:vMerge w:val="restart"/></w:tcPr>`;
+                    } else {
+                        return `<w:tcPr>${n}<w:tcBorders><w:tl2br w:val="single" w:sz="4" w:space="0" w:color="auto"/></w:tcBorders><w:vMerge w:val="restart"/></w:tcPr>`;
+                    }
+                });
+                
+                let tcPrEnd = m.indexOf("</w:tcPr>");
+                if (tcPrEnd !== -1) {
+                    let tcPr = m.substring(0, tcPrEnd + 9);
                     return `${tcPr}<w:p><w:pPr><w:jc w:val="center"/></w:pPr></w:p></w:tc>`;
                 }
                 return m;
