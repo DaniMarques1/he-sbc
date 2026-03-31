@@ -44,10 +44,16 @@ export async function generateHistoricoAction(formData: FormData): Promise<{ bas
         if (formData.get(`CONCLUSAO_${i}`) === "on") conclusionYear = i;
     }
 
+    if (conclusionYear === -1 && transferYear === -1) {
+        throw new Error("É obrigatório marcar pelo menos um ano como Conclusão ou Transferência no Percurso Acadêmico.");
+    }
+
     if (conclusionYear > 0) {
         data["PROSSEGUIMENTO"] = "próximo ano";
+        data["ANO_HISTORICO"] = conclusionYear.toString();
     } else if (transferYear > 0) {
         data["PROSSEGUIMENTO"] = "mesmo ano";
+        data["ANO_HISTORICO"] = transferYear.toString();
         
         // Adiciona "Transfere-se" na mesma célula da escola
         let currentEscola = data[`ESCOLA_${transferYear}`] || "";
@@ -117,20 +123,39 @@ export async function generateHistoricoAction(formData: FormData): Promise<{ bas
     }
     data["disciplinas"] = disciplinas;
     
-    const obsList: { text: string }[] = [];
-    let obsText = "";
+    const obsListTexts: string[] = [];
+    let obsList: { text: string }[] = [];
     for (const key of formData.keys()) {
       if (key.startsWith('obs_title_')) {
         const id = key.replace('obs_title_', '');
         const title = formData.get(`obs_title_${id}`)?.toString() || '';
         const text = formData.get(`obs_text_${id}`)?.toString() || '';
-        obsText += `${title} ${text}\n`;
-        obsList.push({ text: `${title} ${text}` });
+        
+        const formattedTitle = title ? `|BOLD_START|${title}|BOLD_END|` : '';
+        const combinedText = `${formattedTitle} ${text}`.trim();
+        
+        obsListTexts.push(combinedText);
+        obsList.push({ text: combinedText });
       }
     }
-    data["OBS"] = obsText.trim() ? obsText : obsList; 
-    data["ANO_CORRENTE"] = new Date().getFullYear().toString();
-    data["DATA"] = new Date().toLocaleDateString('pt-BR');
+    const obsText = obsListTexts.join('|PARAGRAPH_BREAK|');
+    data["OBS"] = obsText || obsList; 
+    
+    let anoCorrente = new Date().getFullYear().toString();
+    if (conclusionYear > 0 && data[`ANO_${conclusionYear}`]) {
+        anoCorrente = data[`ANO_${conclusionYear}`];
+    } else if (transferYear > 0 && data[`ANO_${transferYear}`]) {
+        anoCorrente = data[`ANO_${transferYear}`];
+    }
+    data["ANO_CORRENTE"] = anoCorrente;
+    
+    const dataCabecalho = formData.get("DATA_CABECALHO")?.toString() || "";
+    if (dataCabecalho) {
+        const [yyyy, mm, dd] = dataCabecalho.split("-");
+        data["DATA"] = `${dd}/${mm}/${yyyy}`;
+    } else {
+        data["DATA"] = new Date().toLocaleDateString('pt-BR');
+    }
     
     const dataNascimento = data["DATA_NASCIMENTO"] || "";
     if (dataNascimento) {
@@ -143,7 +168,7 @@ export async function generateHistoricoAction(formData: FormData): Promise<{ bas
     }
     
     const isTransfVazio = formData.get("SEM_TRANSF_MEIO_ANO") === "on";
-    const transfFields = ['CLASSE', 'TURMA', 'DATA_MATR', 'DATA_TRANSF', 'TURNO', 'CICLO', 'ANO_TRANSF', 'FALTAS', 'DIAS_LET', 'ATE_TRIMESTRE'];
+    const transfFields = ['CLASSE', 'TURMA', 'DATA_MATR', 'DATA_TRANSF', 'TURNO', 'CICLO', 'ANO_TRANSF', 'FALTAS', 'DIAS_LET', 'ATE_TRIMESTRE', 'N_CHAMADA'];
     
     if (isTransfVazio) {
         // Campos de cabeçalho ficam vazios (sem risco)
@@ -156,16 +181,38 @@ export async function generateHistoricoAction(formData: FormData): Promise<{ bas
         tableFields.forEach(field => {
             data[field] = "|MERGE_START_DIAGONAL";
         });
-        data["exibirResolucaoTransf"] = [{ TEXTO_DA_RESOLUCAO_TRANSF: "|MERGE_START_DIAGONAL" }];
+        data["exibirResolucaoTransf1"] = [{ TEXTO_DA_RESOLUCAO_TRANSF1: "|MERGE_START_DIAGONAL" }];
+        data["exibirResolucaoTransf2"] = [{ TEXTO_DA_RESOLUCAO_TRANSF2: "|MERGE_START_DIAGONAL" }];
+        data["exibirResolucaoTransf3"] = [{ TEXTO_DA_RESOLUCAO_TRANSF3: "|MERGE_START_DIAGONAL" }];
     } else {
         transfFields.forEach(field => {
             data[field] = formData.get(field)?.toString() || " ";
         });
         
-        if (data["ATE_TRIMESTRE"]) {
-            data["exibirResolucaoTransf"] = [{ TEXTO_DA_RESOLUCAO_TRANSF: `Até o ${data["ATE_TRIMESTRE"]}` }];
+        const ateTrimestre = data["ATE_TRIMESTRE"];
+        const textoResolucao = formData.get("TEXTO_RESOLUCAO_TRANSF")?.toString().trim() || "Resolução XX";
+        
+        let show1 = false, show2 = false, show3 = false;
+        if (ateTrimestre === "1º Trimestre") { show1 = true; }
+        if (ateTrimestre === "2º Trimestre") { show1 = true; show2 = true; }
+        if (ateTrimestre === "3º Trimestre") { show1 = true; show2 = true; show3 = true; }
+
+        if (show1) {
+            data["exibirResolucaoTransf1"] = [{ TEXTO_DA_RESOLUCAO_TRANSF1: textoResolucao }];
         } else {
-            data["exibirResolucaoTransf"] = [];
+            data["exibirResolucaoTransf1"] = [{ TEXTO_DA_RESOLUCAO_TRANSF1: "|MERGE_START_DIAGONAL" }];
+        }
+
+        if (show2) {
+            data["exibirResolucaoTransf2"] = [{ TEXTO_DA_RESOLUCAO_TRANSF2: textoResolucao }];
+        } else {
+            data["exibirResolucaoTransf2"] = [{ TEXTO_DA_RESOLUCAO_TRANSF2: "|MERGE_START_DIAGONAL" }];
+        }
+
+        if (show3) {
+            data["exibirResolucaoTransf3"] = [{ TEXTO_DA_RESOLUCAO_TRANSF3: textoResolucao }];
+        } else {
+            data["exibirResolucaoTransf3"] = [{ TEXTO_DA_RESOLUCAO_TRANSF3: "|MERGE_START_DIAGONAL" }];
         }
     }
     
@@ -235,6 +282,153 @@ export async function generateHistoricoAction(formData: FormData): Promise<{ bas
                     return `${tcPr}<w:p><w:pPr><w:jc w:val="center"/></w:pPr></w:p></w:tc>`;
                 }
                 return m;
+            }
+        );
+
+        // 4) Transformar pseudo-tags de negrito geradas nas observações
+        xml = xml.replace(
+            /<w:r(?:.*?)>([\s\S]*?)<\/w:r>/g,
+            (match) => {
+                if (match.includes("|BOLD_START|")) {
+                    let rPr = "";
+                    const prMatch = match.match(/<w:rPr>[\s\S]*?<\/w:rPr>/);
+                    if (prMatch) rPr = prMatch[0];
+                    
+                    let boldRPr = rPr ? rPr.replace("</w:rPr>", "<w:b/><w:bCs/></w:rPr>") : "<w:rPr><w:b/><w:bCs/></w:rPr>";
+                    
+                    return match.replace(
+                        /\|BOLD_START\|(.*?)\|BOLD_END\|/g,
+                        `</w:t></w:r><w:r>${boldRPr}<w:t xml:space="preserve">$1</w:t></w:r><w:r>${rPr}<w:t xml:space="preserve">`
+                    );
+                }
+                return match;
+            }
+        );
+
+        // 5) Quebras de parágrafo reais para evitar esticar texto justificado
+        xml = xml.replace(
+            /<w:p(?:(?!<w:p>)[^>])*>([\s\S]*?)<\/w:p>/g,
+            (match) => {
+                if (match.includes("|PARAGRAPH_BREAK|")) {
+                    let pPr = "";
+                    const pPrMatch = match.match(/<w:pPr>[\s\S]*?<\/w:pPr>/);
+                    if (pPrMatch) pPr = pPrMatch[0];
+
+                    let newMatch = match;
+                    newMatch = newMatch.replace(
+                        /<w:r(?:(?!<w:r>)[^>])*>([\s\S]*?)<\/w:r>/g,
+                        (rMatch) => {
+                            if (rMatch.includes("|PARAGRAPH_BREAK|")) {
+                                let rPr = "";
+                                const rPrMatch = rMatch.match(/<w:rPr>[\s\S]*?<\/w:rPr>/);
+                                if (rPrMatch) rPr = rPrMatch[0];
+                                
+                                return rMatch.replace(
+                                    /\|PARAGRAPH_BREAK\|/g,
+                                    `</w:t></w:r></w:p><w:p>${pPr}<w:r>${rPr}<w:t xml:space="preserve">`
+                                );
+                            }
+                            return rMatch;
+                        }
+                    );
+                    return newMatch;
+                }
+                return match;
+            }
+        );
+
+        // 6) Transformar tags HTML <b>, <i> escritas pelo usuário nas observações
+        xml = xml.replace(
+            /<w:p(?:(?!<w:p>)[^>])*>([\s\S]*?)<\/w:p>/gi,
+            (pMatch) => {
+                let htmlbold = false;
+                let htmlitalic = false;
+
+                return pMatch.replace(
+                    /<w:r(?:(?!<w:r>)[^>])*>([\s\S]*?)<\/w:r>/gi,
+                    (rMatch) => {
+                        // Extract base properties
+                        let rOpenMatch = rMatch.match(/^<w:r(?:(?:(?!<w:r>)[^>])*)>/);
+                        let rOpen = rOpenMatch ? rOpenMatch[0] : "<w:r>";
+                        
+                        let rPr = "";
+                        const rPrMatch = rMatch.match(/<w:rPr>[\s\S]*?<\/w:rPr>/);
+                        if (rPrMatch) rPr = rPrMatch[0];
+
+                        // Se não tem as tags, podemos apenas atualizar o estilo do rPr se htmlbold for true
+                        if (!rMatch.match(/&lt;\/?(?:b|i)&gt;/i)) {
+                            if (htmlbold || htmlitalic) {
+                                let styleAdds = "";
+                                if (htmlbold) styleAdds += "<w:b/><w:bCs/>";
+                                if (htmlitalic) styleAdds += "<w:i/><w:iCs/>";
+                                
+                                let currentRPr = rPr;
+                                if (currentRPr) {
+                                    currentRPr = currentRPr.replace("</w:rPr>", `${styleAdds}</w:rPr>`);
+                                    return rMatch.replace(/<w:rPr>[\s\S]*?<\/w:rPr>/, currentRPr);
+                                } else {
+                                    currentRPr = `<w:rPr>${styleAdds}</w:rPr>`;
+                                    return rMatch.replace(/^<w:r(?:(?:(?!<w:r>)[^>])*)>/, `$&${currentRPr}`);
+                                }
+                            }
+                            return rMatch;
+                        }
+
+                        // Se tem tags, precisamos dividir o conteúdo interno
+                        let innerContent = rMatch.replace(rOpen, "").replace(/<\/w:r>$/, "");
+                        if (rPr) innerContent = innerContent.replace(rPr, "");
+
+                        let replacementRuns = [];
+                        let tokens = innerContent.split(/(<w:t(?:[^>]*)>[\s\S]*?<\/w:t>)/g);
+                        
+                        for (let token of tokens) {
+                            if (!token) continue;
+                            
+                            if (token.startsWith("<w:t")) {
+                                let tMatch = token.match(/<w:t([^>]*)>([\s\S]*?)<\/w:t>/);
+                                if (!tMatch) continue;
+                                let tAttrs = tMatch[1];
+                                let tInner = tMatch[2];
+                                
+                                let parts = tInner.split(/(&lt;\/?(?:b|i)&gt;)/i);
+                                for (let p of parts) {
+                                    if (!p) continue;
+                                    let lp = p.toLowerCase();
+                                    if (lp === '&lt;b&gt;') { htmlbold = true; continue; }
+                                    if (lp === '&lt;/b&gt;') { htmlbold = false; continue; }
+                                    if (lp === '&lt;i&gt;') { htmlitalic = true; continue; }
+                                    if (lp === '&lt;/i&gt;') { htmlitalic = false; continue; }
+
+                                    let styleAdds = "";
+                                    if (htmlbold) styleAdds += "<w:b/><w:bCs/>";
+                                    if (htmlitalic) styleAdds += "<w:i/><w:iCs/>";
+                                    
+                                    let currentRPr = rPr;
+                                    if (styleAdds) {
+                                        if (currentRPr) currentRPr = currentRPr.replace("</w:rPr>", `${styleAdds}</w:rPr>`);
+                                        else currentRPr = `<w:rPr>${styleAdds}</w:rPr>`;
+                                    }
+
+                                    replacementRuns.push(`${rOpen}${currentRPr}<w:t${tAttrs}>${p}</w:t></w:r>`);
+                                }
+                            } else {
+                                let styleAdds = "";
+                                if (htmlbold) styleAdds += "<w:b/><w:bCs/>";
+                                if (htmlitalic) styleAdds += "<w:i/><w:iCs/>";
+                                
+                                let currentRPr = rPr;
+                                if (styleAdds) {
+                                    if (currentRPr) currentRPr = currentRPr.replace("</w:rPr>", `${styleAdds}</w:rPr>`);
+                                    else currentRPr = `<w:rPr>${styleAdds}</w:rPr>`;
+                                }
+
+                                replacementRuns.push(`${rOpen}${currentRPr}${token}</w:r>`);
+                            }
+                        }
+                        
+                        return replacementRuns.join("");
+                    }
+                );
             }
         );
 

@@ -1,25 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type Observation = { id: string; title: string; text: string; checked: boolean };
 
 const defaultObs: Observation[] = [
-  { id: '1', title: "Fundamental 9 Anos: ", text: "Conforme Resolução SE nº 14/2010, que dispõe sobre a organização do Ensino Fundamental de 9 anos na rede municipal de ensino de São Bernardo do Campo e alterações na organização dos ciclos no Ensino Fundamental, alterada pela Deliberação CME nº 02/2013.", checked: true },
-  { id: '2', title: "Divisão do Ano Letivo: ", text: "Conforme deliberação CME nº 03/2010, a partir de 2011, a divisão do ano letivo passa a ser em 3 (três) trimestres na Rede Municipal de Ensino de São Bernardo do Campo, que foi homologada pela Resolução SE 16/2011.", checked: true },
-  { id: '3', title: "Alteração de nomenclatura: ", text: "Conforme a Deliberação CME nº 02/2017 que dispõe sobre a organização do primeiro ciclo do Ensino Fundamental em Ciclo I (1º, 2º e 3º anos) e Ciclo II (4º e 5º anos).", checked: true },
-  { id: '4', title: "Legislações que regulamentam o ano de 2020: ", text: "", checked: true },
-  { id: '5', title: "Lei 14 040/2020: ", text: "Estabeleceu normas educacionais excepcionais adotadas durante o estado de calamidade pública reconhecido pelo Decreto Legislativo nº 6, de 20 de março de 2020.", checked: true },
-  { id: '6', title: "Deliberação CME 01/2020: ", text: "Fixou normas quanto à reorganização dos calendários escolares para as instituições vinculadas ao Sistema Municipal de Ensino de São Bernardo do Campo, devido a suspensão das aulas presenciais em virtude da pandemia do COVID-19", checked: true },
-  { id: '7', title: "Deliberação CME 02/2020: ", text: "Dispõe sobre a divisão do ano letivo de 2020 em dois períodos na Rede Municipal de Ensino de São Bernardo do Campo, homologada pela Resolução da SE 16/2020, períodos definidos na Resolução SE 32/2020, alterado pela Resolução SE 33/2020.", checked: true },
-  { id: '8', title: "Resolução SE 40/2020: ", text: "Dispõe sobre o conceito de reordenamento da trajetória escolar em um continuum de dois anos (2020/2021) e a avaliação das aprendizagens dos estudantes da Rede Municipal de Ensino de São Bernardo do Campo.", checked: true },
-  { id: '9', title: "", text: "As Fichas de Rendimento Escolar do aluno correspondentes aos estudos realizados no ano letivo em curso (e no continuum 2020/2021) seguem anexas ao Histórico Escolar.", checked: true }
+  { id: '1', title: "Fundamental 9 Anos: ", text: "Conforme <b>Resolução SE nº 14/2010</b>, alterada pela <b>Resolução SE nº 16/2011</b> e <b>CME nº 02/2017</b> o primeiro segmento do Ensino Fundamental nas Escolas Municipais, com duração de no mínimo 5 (cinco) anos, organiza-se em Ciclo I (1º, 2º e 3º anos) e Ciclo II (4º e 5º anos).", checked: true },
+  { id: '2', title: "Divisão do Ano Letivo: ", text: "Conforme <b>Deliberação CME nº 03/2010</b>, a divisão do ano letivo passa a ser organizada em 3 (três) trimestres na Rede Municipal de Ensino de São Bernardo do Campo.", checked: true },
+  { id: '4', title: "Legislações que regulamentam o ano de 2020: ", text: "", checked: false },
+  { id: '5', title: "Lei 14 040/2020: ", text: "Estabeleceu normas educacionais excepcionais adotadas durante o estado de calamidade pública reconhecido pelo Decreto Legislativo nº 6, de 20 de março de 2020.", checked: false },
+  { id: '6', title: "Deliberação CME 01/2020: ", text: "Fixou normas quanto à reorganização dos calendários escolares para as instituições vinculadas ao Sistema Municipal de Ensino de São Bernardo do Campo, devido a suspensão das aulas presenciais em virtude da pandemia do COVID-19", checked: false },
+  { id: '7', title: "Deliberação CME 02/2020: ", text: "Dispõe sobre a divisão do ano letivo de 2020 em dois períodos na Rede Municipal de Ensino de São Bernardo do Campo, homologada pela Resolução da SE 16/2020, períodos definidos na Resolução SE 32/2020, alterado pela Resolução SE 33/2020.", checked: false },
+  { id: '8', title: "Resolução SE 40/2020: ", text: "Dispõe sobre o conceito de reordenamento da trajetória escolar em um continuum de dois anos (2020/2021) e a avaliação das aprendizagens dos estudantes da Rede Municipal de Ensino de São Bernardo do Campo.", checked: false },
+  { id: '3', title: "", text: "As Fichas de Rendimento Escolar do aluno correspondentes aos estudos realizados no ano letivo em curso seguem anexas ao Histórico Escolar.", checked: true }
 ];
 
 export function Observacoes() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [is2020Expanded, setIs2020Expanded] = useState(false);
   const [observations, setObservations] = useState<Observation[]>(defaultObs);
+
+  useEffect(() => {
+    const handleYearDetect = () => {
+      setObservations(prev => {
+        const newObs = [...prev];
+        let changed = false;
+        for (let i = 2; i <= 6; i++) {
+          if (newObs[i] && !newObs[i].checked) {
+            newObs[i].checked = true;
+            changed = true;
+          }
+        }
+        return changed ? newObs : prev;
+      });
+      setIs2020Expanded(true);
+      setIsExpanded(true);
+    };
+
+    window.addEventListener("onYear2020or2021Detected", handleYearDetect);
+    return () => window.removeEventListener("onYear2020or2021Detected", handleYearDetect);
+  }, []);
 
   const addObservation = () => {
     const newObs = {
@@ -28,7 +48,14 @@ export function Observacoes() {
       text: "",
       checked: true
     };
-    setObservations([...observations, newObs]);
+    const id3Index = observations.findIndex(o => o.id === '3');
+    if (id3Index !== -1) {
+      const newArr = [...observations];
+      newArr.splice(id3Index, 0, newObs);
+      setObservations(newArr);
+    } else {
+      setObservations([...observations, newObs]);
+    }
   };
 
   const renderObservation = (obs: Observation, index: number) => (
@@ -69,8 +96,9 @@ export function Observacoes() {
           rows={2}
         />
       </div>
-      {index >= 9 && (
+      {!defaultObs.find(d => d.id === obs.id) && (
         <button
+          type="button"
           onClick={() => {
             const newObs = [...observations];
             newObs.splice(index, 1);
@@ -85,7 +113,7 @@ export function Observacoes() {
     </div>
   );
 
-  const group2020 = observations.slice(3, 9);
+  const group2020 = observations.slice(2, 7);
   const all2020Checked = group2020.length > 0 && group2020.every(o => o.checked);
   const some2020Checked = group2020.some(o => o.checked);
 
@@ -108,11 +136,11 @@ export function Observacoes() {
         </div>
         <div className={isExpanded ? "block" : "hidden"}>
           <div className="flex flex-col gap-5">
-            {observations.slice(0, 3).map((obs, index) => renderObservation(obs, index))}
+            {observations.slice(0, 2).map((obs, index) => renderObservation(obs, index))}
 
-            {observations.length >= 9 && (
+            {observations.length >= 7 && (
               <div className="border border-outline-variant/50 rounded-xl overflow-hidden mt-2 mb-2">
-                <div 
+                <div
                   className="px-4 py-3 flex justify-between items-center cursor-pointer hover:bg-surface-variant/20 transition-colors select-none bg-surface-variant/10"
                   onClick={() => setIs2020Expanded(!is2020Expanded)}
                 >
@@ -129,7 +157,7 @@ export function Observacoes() {
                       onChange={(e) => {
                         const checked = e.target.checked;
                         const newObs = [...observations];
-                        for (let i = 3; i <= 8; i++) {
+                        for (let i = 2; i <= 6; i++) {
                           if (newObs[i]) {
                             newObs[i].checked = checked;
                           }
@@ -150,15 +178,16 @@ export function Observacoes() {
 
                 <div className={is2020Expanded ? "block" : "hidden"}>
                   <div className="p-4 flex flex-col gap-5 border-t border-outline-variant/30">
-                    {group2020.map((obs, localIndex) => renderObservation(obs, localIndex + 3))}
+                    {group2020.map((obs, localIndex) => renderObservation(obs, localIndex + 2))}
                   </div>
                 </div>
               </div>
             )}
 
-            {observations.length > 9 && observations.slice(9).map((obs, localIndex) => renderObservation(obs, localIndex + 9))}
+            {observations.length > 7 && observations.slice(7).map((obs, localIndex) => renderObservation(obs, localIndex + 7))}
 
             <button
+              type="button"
               onClick={addObservation}
               className="mt-2 flex items-center gap-2 self-start text-sm font-medium text-primary hover:bg-primary/10 px-4 py-2 rounded-full transition-colors"
             >

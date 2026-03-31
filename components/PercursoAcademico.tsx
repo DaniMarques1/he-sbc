@@ -10,11 +10,11 @@ export function PercursoAcademico() {
   const isAnyEducarMaisChecked = Object.values(educarMaisChecked).some(Boolean);
 
   const records = [
-    { year: "1º Ano", hours: "1000", calendar: "2019", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" },
-    { year: "2º Ano", hours: "1000", calendar: "2020", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" },
-    { year: "3º Ano", hours: "1000", calendar: "2021", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" },
-    { year: "4º Ano", hours: "1000", calendar: "2022", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" },
-    { year: "5º Ano", hours: "1000", calendar: "2023", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" }
+    { year: "1º Ano", hours: "1000", calendar: "2022", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" },
+    { year: "2º Ano", hours: "1000", calendar: "2023", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" },
+    { year: "3º Ano", hours: "1000", calendar: "2024", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" },
+    { year: "4º Ano", hours: "1000", calendar: "2025", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" },
+    { year: "5º Ano", hours: "1000", calendar: "2026", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" }
   ];
 
   return (
@@ -67,7 +67,19 @@ export function PercursoAcademico() {
                         <input type="text" defaultValue={record.year} disabled={isAnyDisabled} className={inputClass} />
                       </td>
                       <td className="px-2 py-3">
-                        <input type="text" name={`ANO_${index + 1}`} defaultValue={record.calendar} disabled={isAnyDisabled} className={inputClass} />
+                        <input
+                          type="text"
+                          name={`ANO_${index + 1}`}
+                          defaultValue={record.calendar}
+                          disabled={isAnyDisabled}
+                          className={inputClass}
+                          onChange={(e) => {
+                            const val = e.target.value.trim();
+                            if (val === "2020" || val === "2021") {
+                              window.dispatchEvent(new CustomEvent("onYear2020or2021Detected"));
+                            }
+                          }}
+                        />
                       </td>
                       <td className="px-2 py-3">
                         <input type="text" name={`HORAS_${index + 1}`} defaultValue={record.hours} disabled={isAnyDisabled} className={inputClass} />
@@ -80,7 +92,10 @@ export function PercursoAcademico() {
                           onChange={() => {
                             const newIndex = conclusionIndex === index ? null : index;
                             setConclusionIndex(newIndex);
-                            if (newIndex !== null) setTransferIndex(null);
+                            if (newIndex !== null) {
+                              setTransferIndex(null);
+                              window.dispatchEvent(new CustomEvent("onConclusionMarked"));
+                            }
                           }}
                           disabled={isAnyDisabled}
                           className="w-4 h-4 cursor-pointer accent-primary disabled:opacity-40"

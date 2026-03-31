@@ -1,9 +1,17 @@
+import { useState, useEffect } from 'react';
+
 interface HeaderProps {
   isMobileMenuOpen?: boolean;
   onToggleMobileMenu?: () => void;
 }
 
 export function Header({ isMobileMenuOpen, onToggleMobileMenu }: HeaderProps) {
+  const [currentDate, setCurrentDate] = useState("");
+
+  useEffect(() => {
+    setCurrentDate(new Date().toISOString().split('T')[0]);
+  }, []);
+
   return (
     <header className="bg-[#fbf8ff] flex flex-col w-full sticky top-0 z-40 border-b border-transparent md:border-none transition-all">
       <div className="flex justify-between items-center px-4 md:px-8 py-4 w-full">
@@ -21,9 +29,16 @@ export function Header({ isMobileMenuOpen, onToggleMobileMenu }: HeaderProps) {
             )}
             <h2 className="font-manrope font-bold text-lg md:text-2xl text-[#1A237E]">Histórico Escolar</h2>
           </div>
-          <div className="hidden md:flex bg-surface-container-high px-3 py-1 rounded-full items-center gap-2">
+          <div className="hidden md:flex bg-surface-container-high px-3 py-1 rounded-full items-center gap-2 relative">
             <span className="material-symbols-outlined text-xs text-secondary" data-icon="calendar_today">calendar_today</span>
-            <input type="text" defaultValue="18/03/2026" className="text-xs font-medium text-secondary bg-transparent w-18 focus:outline-none text-center" />
+            <input 
+              type="date" 
+              name="DATA_CABECALHO"
+              form="historicoForm"
+              value={currentDate}
+              onChange={(e) => setCurrentDate(e.target.value)}
+              className="text-xs font-medium text-secondary bg-transparent focus:outline-none text-center cursor-pointer w-[100px] [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer" 
+            />
           </div>
         </div>
         <div className="flex items-center gap-4 md:gap-6">

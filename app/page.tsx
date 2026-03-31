@@ -66,7 +66,7 @@ export default function HistoricoEscolar() {
         />
 
         {/* Content Canvas */}
-        <form onSubmit={handleSubmit} className="px-4 md:px-10 py-6 md:py-8 max-w-7xl mx-auto space-y-8 md:space-y-10">
+        <form id="historicoForm" onSubmit={handleSubmit} className="px-4 md:px-10 py-6 md:py-8 max-w-7xl mx-auto space-y-8 md:space-y-10">
           <DadosUnidadeEscolar />
           <IdentificacaoAluno />
           <ResultadosEnsinoFundamental />
