@@ -61,6 +61,7 @@ export default function HistoricoEscolar() {
       {/* Main Content Area */}
       <main className="md:ml-64 min-h-screen transition-all duration-300">
         <Header
+          isPending={isPending}
           isMobileMenuOpen={isMobileMenuOpen}
           onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         />
