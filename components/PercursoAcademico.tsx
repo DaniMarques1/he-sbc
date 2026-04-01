@@ -138,7 +138,7 @@ export function PercursoAcademico() {
                               key={`em-on-${index}`}
                               type="text"
                               name={`HMAIS_${index + 1}`}
-                              defaultValue="600h"
+                              defaultValue="600"
                               disabled={isAnyDisabled}
                               className={inputClass}
                               placeholder="Ex: 600h"
