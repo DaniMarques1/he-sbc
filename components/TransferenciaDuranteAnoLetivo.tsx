@@ -16,11 +16,20 @@ export function TransferenciaDuranteAnoLetivo() {
       setIsExpanded(false);
     };
 
+    const handleTemplateLoad = (e: any) => {
+      const data = e.detail;
+      if (data && data.SEM_TRANSF_MEIO_ANO !== undefined) {
+        setIsEmpty(data.SEM_TRANSF_MEIO_ANO === "on");
+      }
+    };
+
     window.addEventListener("onTransfMarked", handleTransfMarked);
     window.addEventListener("onConclusionMarked", handleConclusionMarked);
+    window.addEventListener("onTemplateLoaded", handleTemplateLoad);
     return () => {
       window.removeEventListener("onTransfMarked", handleTransfMarked);
       window.removeEventListener("onConclusionMarked", handleConclusionMarked);
+      window.removeEventListener("onTemplateLoaded", handleTemplateLoad);
     };
   }, []);
 

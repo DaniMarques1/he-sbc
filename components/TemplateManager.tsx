@@ -33,9 +33,9 @@ export function TemplateLoadPopover({ isOpen, onClose, user }: { isOpen: boolean
     Object.keys(flatData).forEach(key => {
       const els = document.getElementsByName(key);
       if (els && els.length > 0) {
-        const el = els[0] as HTMLInputElement;
+        const el = els[0] as HTMLInputElement | HTMLSelectElement;
         if (el.type === 'checkbox' || el.type === 'radio') {
-          el.checked = flatData[key] === 'on' || flatData[key] === true;
+          (el as HTMLInputElement).checked = flatData[key] === 'on' || flatData[key] === true;
         } else {
           el.value = flatData[key];
         }
@@ -43,6 +43,10 @@ export function TemplateLoadPopover({ isOpen, onClose, user }: { isOpen: boolean
         el.dispatchEvent(new Event("input", { bubbles: true }));
       }
     });
+
+    // Notifica os componentes para atualizarem seus estados internos (React controlled states)
+    window.dispatchEvent(new CustomEvent('onTemplateLoaded', { detail: flatData }));
+
     window.dispatchEvent(new CustomEvent('show_toast', { detail: 'Template carregado!' }));
     onClose();
   };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export function PercursoAcademico() {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -16,6 +16,30 @@ export function PercursoAcademico() {
     { year: "4º Ano", hours: "1000", calendar: "2025", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" },
     { year: "5º Ano", hours: "1000", calendar: "2026", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" }
   ];
+
+  useEffect(() => {
+    const handleTemplateLoad = (e: any) => {
+      const data = e.detail;
+      if (!data) return;
+
+      let foundConclusion: number | null = null;
+      let foundTransfer: number | null = null;
+      const emChecked: Record<number, boolean> = {};
+
+      for (let i = 1; i <= 5; i++) {
+        if (data[`CONCLUSAO_${i}`] === "on") foundConclusion = i - 1;
+        if (data[`TRANSF_${i}`] === "on") foundTransfer = i - 1;
+        emChecked[i - 1] = data[`EDUCARMAIS_${i}`] === "on";
+      }
+
+      setConclusionIndex(foundConclusion);
+      setTransferIndex(foundTransfer);
+      setEducarMaisChecked(emChecked);
+    };
+
+    window.addEventListener("onTemplateLoaded", handleTemplateLoad);
+    return () => window.removeEventListener("onTemplateLoaded", handleTemplateLoad);
+  }, []);
 
   return (
     <section className="bg-surface-container-low rounded-2xl md:rounded-full overflow-hidden shadow-sm">

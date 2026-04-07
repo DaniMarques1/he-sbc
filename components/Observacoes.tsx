@@ -38,7 +38,42 @@ export function Observacoes() {
     };
 
     window.addEventListener("onYear2020or2021Detected", handleYearDetect);
-    return () => window.removeEventListener("onYear2020or2021Detected", handleYearDetect);
+
+    const handleTemplateLoad = (e: any) => {
+      const data = e.detail;
+      if (!data) return;
+
+      // Busca todas as chaves que começam com obs_title_ para identificar as observações salvas
+      const obsIds = Object.keys(data)
+        .filter(k => k.startsWith('obs_title_'))
+        .map(k => k.replace('obs_title_', ''));
+
+      if (obsIds.length > 0) {
+        const newObs: Observation[] = obsIds.map(id => ({
+          id,
+          title: data[`obs_title_${id}`] || "",
+          text: data[`obs_text_${id}`] || "",
+          checked: data[`obs_checked_${id}`] === "on"
+        }));
+        
+        // Ordenação básica: IDs numéricos primeiro, depois por timestamp (Date.now)
+        newObs.sort((a, b) => {
+          const aNum = parseInt(a.id);
+          const bNum = parseInt(b.id);
+          if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+          return a.id.localeCompare(b.id);
+        });
+
+        setObservations(newObs);
+      }
+    };
+
+    window.addEventListener("onTemplateLoaded", handleTemplateLoad);
+
+    return () => {
+      window.removeEventListener("onYear2020or2021Detected", handleYearDetect);
+      window.removeEventListener("onTemplateLoaded", handleTemplateLoad);
+    };
   }, []);
 
   const addObservation = () => {
@@ -62,6 +97,7 @@ export function Observacoes() {
     <div key={obs.id} className="flex items-start gap-3 w-full">
       <input
         type="checkbox"
+        name={`obs_checked_${obs.id}`}
         checked={obs.checked}
         onChange={(e) => {
           const newObs = [...observations];

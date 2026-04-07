@@ -59,8 +59,19 @@ export default function HistoricoEscolar() {
           const byteArray = new Uint8Array(byteNumbers);
           const blob = new Blob([byteArray], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
           
+          const nomeAluno = formData.get("NOME_ALUNO")?.toString() || "Aluno";
+          let anoHistorico = "";
+          for (let i = 1; i <= 5; i++) {
+            if (formData.get(`CONCLUSAO_${i}`) === "on" || formData.get(`TRANSF_${i}`) === "on") {
+              anoHistorico = formData.get(`ANO_${i}`)?.toString() || "";
+              break;
+            }
+          }
+
+          const safeFileName = anoHistorico ? `${nomeAluno}-${anoHistorico}.docx` : `${nomeAluno}.docx`;
+          
           const saveAs = (await import("file-saver")).saveAs;
-          saveAs(blob, `Historico_${formData.get("NOME_ALUNO") || "Aluno"}.docx`);
+          saveAs(blob, safeFileName);
         }
       } catch (err) {
         console.error(err);

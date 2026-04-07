@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export function ResultadosEnsinoFundamental() {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -11,6 +11,24 @@ export function ResultadosEnsinoFundamental() {
     4: 'Resolução',
     5: 'Resolução',
   });
+
+  useEffect(() => {
+    const handleTemplateLoad = (e: any) => {
+      const data = e.detail;
+      if (!data) return;
+
+      const newRowTypes: Record<number, string> = { ...rowTypes };
+      for (let i = 1; i <= 5; i++) {
+        if (data[`res_type_${i}`]) {
+          newRowTypes[i] = data[`res_type_${i}`];
+        }
+      }
+      setRowTypes(newRowTypes);
+    };
+
+    window.addEventListener("onTemplateLoaded", handleTemplateLoad);
+    return () => window.removeEventListener("onTemplateLoaded", handleTemplateLoad);
+  }, [rowTypes]);
 
   const subjects = [
     { name: "HISTÓRIA", grade: "9.0" },
