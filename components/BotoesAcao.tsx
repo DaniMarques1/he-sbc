@@ -15,9 +15,13 @@ export function BotoesAcao({ isPending }: { isPending?: boolean }) {
         <span className="material-symbols-outlined text-sm" data-icon="print">print</span>
         Gerar PDF
       </button>
-      <button className="bg-gradient-to-br from-primary to-primary-container text-white px-10 py-3 rounded-xl font-manrope font-bold text-sm shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2">
+      <button 
+        type="submit"
+        name="action"
+        value="save_template"
+        className="bg-gradient-to-br from-primary to-primary-container text-white px-10 py-3 rounded-xl font-manrope font-bold text-sm shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2">
         <span className="material-symbols-outlined text-sm" data-icon="save">save</span>
-        Salvar Registro
+        Salvar Template
       </button>
     </div>
   );

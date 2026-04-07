@@ -1,4 +1,6 @@
-export function Sidebar() {
+import { TemplateLoadPopover } from './TemplateManager';
+
+export function Sidebar({ user, isLoadOpen, onOpenLoad, onCloseLoad }: { user?: any, isLoadOpen?: boolean, onOpenLoad?: () => void, onCloseLoad?: () => void }) {
   return (
     <nav className="hidden md:flex h-screen w-64 fixed left-0 top-0 border-r-0 bg-[#f3f2fe] flex-col py-6 z-50">
       <div className="px-8 mb-10">
@@ -17,6 +19,13 @@ export function Sidebar() {
           <span className="material-symbols-outlined" data-icon="description">description</span>
           <span className="font-manrope font-semibold text-sm tracking-wide">Histórico Escolar</span>
         </a>
+        <div className="relative">
+          <button type="button" onClick={isLoadOpen ? onCloseLoad : onOpenLoad} className="w-[calc(100%-1rem)] flex items-center gap-4 text-[#585c80] hover:text-[#1A237E] rounded-l-full ml-4 pl-4 py-3 transition-all hover:bg-[#e2e1ed]">
+            <span className="material-symbols-outlined" data-icon="folder_special">folder_special</span>
+            <span className="font-manrope font-semibold text-sm tracking-wide">Meus Templates</span>
+          </button>
+          <TemplateLoadPopover isOpen={!!isLoadOpen} onClose={onCloseLoad!} user={user} />
+        </div>
       </div>
       <div className="mt-auto space-y-1">
         <a className="flex items-center gap-4 text-[#585c80] hover:text-[#1A237E] px-8 py-3 transition-all hover:bg-[#e2e1ed]" href="#">

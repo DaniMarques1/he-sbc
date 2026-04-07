@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { createClient } from '@/utils/supabase/client';
+import { useRouter } from 'next/navigation';
 
 interface HeaderProps {
   isMobileMenuOpen?: boolean;
@@ -8,10 +10,34 @@ interface HeaderProps {
 
 export function Header({ isMobileMenuOpen, onToggleMobileMenu, isPending }: HeaderProps) {
   const [currentDate, setCurrentDate] = useState("");
+  const [user, setUser] = useState<any>(null);
+  const supabase = createClient();
+  const router = useRouter();
 
   useEffect(() => {
     setCurrentDate(new Date().toISOString().split('T')[0]);
-  }, []);
+    
+    // Fetch User
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+    });
+
+    // Listen to changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase.auth]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.refresh();
+  };
+
+  const handleLoginRedirect = () => {
+    router.push('/login');
+  };
 
   return (
     <header className="bg-[#fbf8ff] flex flex-col w-full sticky top-0 z-40 border-b border-transparent md:border-none transition-all">
@@ -66,20 +92,28 @@ export function Header({ isMobileMenuOpen, onToggleMobileMenu, isPending }: Head
                 <span className="material-symbols-outlined text-[16px]" data-icon="print">print</span>
                 PDF
               </button>
+            </div>
+            {user ? (
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-bold text-primary hidden md:block">
+                  {user.user_metadata?.institution_name || user.email}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="bg-surface-container-highest text-secondary text-xs px-3 py-2 rounded-lg font-bold hover:bg-[#e2e1ed] transition-colors"
+                >
+                  Sair
+                </button>
+              </div>
+            ) : (
               <button
+                onClick={handleLoginRedirect}
                 className="bg-gradient-to-br from-primary to-primary-container text-white px-5 py-2 rounded-lg font-manrope font-bold text-xs shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
               >
-                <span className="material-symbols-outlined text-[16px]" data-icon="save">save</span>
-                Salvar
+                <span className="material-symbols-outlined text-[16px]" data-icon="login">login</span>
+                Entrar
               </button>
-            </div>
-            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border border-outline-variant/20">
-              <img
-                alt="Administrator Profile"
-                className="w-full h-full object-cover"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAV73a9aygR46DAUQXMMifkAJ7jvVDZ7eUwz-qCxAZ0g1_ilaghlSqrtCmjRADIiwfYDMGTAz9tC9MmqDh7q6-3qVWj6wsEXo-VL2YKZskxbGFkgGIWP-vHhC8784iu6FALjgh82Dzv71B06bCUqylN13-jTSCCkHYWMZ9zUhW_OD_C_KOB_-ioSZNuGYBSbOSHn8OX8nxzEO9fpWb_TgikaZoiCyiFyM_n4ZpzIyC2vZRIy2OzMC77vWF_g8Naf2474SZYg4AVZes"
-              />
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -91,14 +125,17 @@ export function Header({ isMobileMenuOpen, onToggleMobileMenu, isPending }: Head
               <span className="material-symbols-outlined" data-icon="description">description</span>
               <span className="text-sm">Histórico Escolar</span>
             </a>
-            <a className="flex items-center gap-4 px-6 py-3 text-[#585c80] hover:bg-[#e2e1ed] transition-colors font-manrope font-semibold" href="#">
-              <span className="material-symbols-outlined" data-icon="contact_support">contact_support</span>
-              <span className="text-sm">Support</span>
-            </a>
-            <a className="flex items-center gap-4 px-6 py-3 text-[#585c80] hover:bg-[#e2e1ed] transition-colors font-manrope font-semibold" href="#">
-              <span className="material-symbols-outlined" data-icon="logout">logout</span>
-              <span className="text-sm">Sign Out</span>
-            </a>
+            {user ? (
+              <button onClick={handleLogout} className="flex w-full items-center gap-4 px-6 py-3 text-[#585c80] hover:bg-[#e2e1ed] transition-colors font-manrope font-semibold">
+                <span className="material-symbols-outlined" data-icon="logout">logout</span>
+                <span className="text-sm">Sair</span>
+              </button>
+            ) : (
+              <button onClick={handleLoginRedirect} className="flex w-full items-center gap-4 px-6 py-3 text-[#585c80] hover:bg-[#e2e1ed] transition-colors font-manrope font-semibold">
+                <span className="material-symbols-outlined" data-icon="login">login</span>
+                <span className="text-sm">Entrar</span>
+              </button>
+            )}
           </nav>
         </div>
       )}

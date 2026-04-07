@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
 import { DadosUnidadeEscolar } from "@/components/DadosUnidadeEscolar";
@@ -12,10 +12,30 @@ import { Observacoes } from "@/components/Observacoes";
 import { BotoesAcao } from "@/components/BotoesAcao";
 import { Analytics } from "@vercel/analytics/next";
 import { generateHistoricoAction } from "./actions/generateHistorico";
+import { createClient } from "@/utils/supabase/client";
+import { Toast } from "@/components/Toast";
+import { TemplateSavePopover } from "@/components/TemplateManager";
 
 export default function HistoricoEscolar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isPending, setIsPending] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  const [templateModalMode, setTemplateModalMode] = useState<"load" | "save">("load");
+  const [alunoDataToSave, setAlunoDataToSave] = useState<any>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -29,7 +49,7 @@ export default function HistoricoEscolar() {
         const result = await generateHistoricoAction(formData);
         
         if (result.error) {
-          alert("Erro gerando documento: " + result.error);
+          window.dispatchEvent(new CustomEvent('show_toast', { detail: "Erro gerando documento: " + result.error }));
         } else if (result.base64) {
           const byteCharacters = atob(result.base64);
           const byteNumbers = new Array(byteCharacters.length);
@@ -48,17 +68,30 @@ export default function HistoricoEscolar() {
       } finally {
         setIsPending(false);
       }
+    } else if (action === "save_template") {
+      if (!user) {
+        alert("Você precisa estar logado para salvar um template!");
+        return;
+      }
+      const formData = new FormData(e.currentTarget);
+      const dataObj: any = {};
+      formData.forEach((value, key) => {
+        dataObj[key] = value;
+      });
+      
+      setAlunoDataToSave(dataObj);
+      setTemplateModalMode("save");
+      setIsTemplateModalOpen(true);
     } else {
-        // Implementar as outras ações futuramente se necessário
         alert("Ação não implementada ainda.");
     }
   };
 
   return (
     <>
+      <Toast />
       <Analytics />
-      <Sidebar />
-      {/* Main Content Area */}
+      <Sidebar user={user} isLoadOpen={templateModalMode === "load" && isTemplateModalOpen} onOpenLoad={() => { setTemplateModalMode("load"); setIsTemplateModalOpen(true); }} onCloseLoad={() => setIsTemplateModalOpen(false)} />
       <main className="md:ml-64 min-h-screen transition-all duration-300">
         <Header
           isPending={isPending}
@@ -66,8 +99,8 @@ export default function HistoricoEscolar() {
           onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         />
 
-        {/* Content Canvas */}
         <form id="historicoForm" onSubmit={handleSubmit} className="px-4 md:px-10 py-6 md:py-8 max-w-7xl mx-auto space-y-8 md:space-y-10">
+          
           <DadosUnidadeEscolar />
           <IdentificacaoAluno />
           <ResultadosEnsinoFundamental />
@@ -75,7 +108,15 @@ export default function HistoricoEscolar() {
           <TransferenciaDuranteAnoLetivo />
           <Observacoes />
 
-          <BotoesAcao isPending={isPending} />
+          <div className="relative w-full">
+            <TemplateSavePopover 
+              isOpen={templateModalMode === "save" && isTemplateModalOpen} 
+              onClose={() => setIsTemplateModalOpen(false)} 
+              user={user} 
+              alunoDataToSave={alunoDataToSave} 
+            />
+            <BotoesAcao isPending={isPending} />
+          </div>
         </form>
       </main>
     </>
