@@ -3,19 +3,21 @@
 import { useState, useEffect } from "react";
 
 export function PercursoAcademico({ user }: { user?: any }) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [transferIndex, setTransferIndex] = useState<number | null>(null);
   const [conclusionIndex, setConclusionIndex] = useState<number | null>(null);
   const [educarMaisChecked, setEducarMaisChecked] = useState<Record<number, boolean>>({});
   const isAnyEducarMaisChecked = Object.values(educarMaisChecked).some(Boolean);
   const userEmeb = user?.user_metadata?.emeb_name || "";
 
+  const currentYear = new Date().getFullYear();
+  
   const records = [
-    { year: "1º Ano", hours: "1000", calendar: "2022", city: "São Bernardo do Campo", state: "SP" },
-    { year: "2º Ano", hours: "1000", calendar: "2023", city: "São Bernardo do Campo", state: "SP" },
-    { year: "3º Ano", hours: "1000", calendar: "2024", city: "São Bernardo do Campo", state: "SP" },
-    { year: "4º Ano", hours: "1000", calendar: "2025", city: "São Bernardo do Campo", state: "SP" },
-    { year: "5º Ano", hours: "1000", calendar: "2026", city: "São Bernardo do Campo", state: "SP" }
+    { year: "1º Ano", hours: "1000", calendar: (currentYear - 4).toString(), city: "São Bernardo do Campo", state: "SP" },
+    { year: "2º Ano", hours: "1000", calendar: (currentYear - 3).toString(), city: "São Bernardo do Campo", state: "SP" },
+    { year: "3º Ano", hours: "1000", calendar: (currentYear - 2).toString(), city: "São Bernardo do Campo", state: "SP" },
+    { year: "4º Ano", hours: "1000", calendar: (currentYear - 1).toString(), city: "São Bernardo do Campo", state: "SP" },
+    { year: "5º Ano", hours: "1000", calendar: currentYear.toString(), city: "São Bernardo do Campo", state: "SP" }
   ];
 
   useEffect(() => {

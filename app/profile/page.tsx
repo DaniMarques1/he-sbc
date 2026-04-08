@@ -18,6 +18,9 @@ export default function ProfilePage() {
   const [emebTel1, setEmebTel1] = useState("");
   const [emebTel2, setEmebTel2] = useState("");
   const [emebAtoCriacao, setEmebAtoCriacao] = useState("");
+  const [respNome, setRespNome] = useState("");
+  const [respMatricula, setRespMatricula] = useState("");
+  const [respCargo, setRespCargo] = useState("");
 
   const supabase = createClient();
 
@@ -33,6 +36,9 @@ export default function ProfilePage() {
         setEmebTel1(meta.emeb_tel1 || "");
         setEmebTel2(meta.emeb_tel2 || "");
         setEmebAtoCriacao(meta.emeb_ato_criacao || "");
+        setRespNome(meta.resp_nome || "");
+        setRespMatricula(meta.resp_matricula || "");
+        setRespCargo(meta.resp_cargo || "");
       }
     });
 
@@ -55,7 +61,10 @@ export default function ProfilePage() {
         emeb_cep: emebCep,
         emeb_tel1: emebTel1,
         emeb_tel2: emebTel2,
-        emeb_ato_criacao: emebAtoCriacao
+        emeb_ato_criacao: emebAtoCriacao,
+        resp_nome: respNome,
+        resp_matricula: respMatricula,
+        resp_cargo: respCargo
       }
     });
 
@@ -151,6 +160,41 @@ export default function ProfilePage() {
                     placeholder="DECRETO nº 99.999 de 01/01/2000"
                     className="text-on-surface font-medium border-b border-outline-variant/20 pb-1 bg-transparent w-full focus:outline-none focus:border-primary transition-colors"
                   />
+                </div>
+
+                <div className="space-y-1 md:col-span-3 mt-4 border-t border-outline-variant/20 pt-6">
+                  <h3 className="text-sm font-bold font-headline text-primary mb-2">Informações do(a) Diretor(a) (Assinatura)</h3>
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Nome</label>
+                  <input
+                    type="text"
+                    value={respNome}
+                    onChange={(e) => setRespNome(e.target.value)}
+                    placeholder="Nome do Responsável"
+                    className="text-on-surface font-medium border-b border-outline-variant/20 pb-1 bg-transparent w-full focus:outline-none focus:border-primary transition-colors"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Matrícula</label>
+                  <input
+                    type="text"
+                    value={respMatricula}
+                    onChange={(e) => setRespMatricula(e.target.value)}
+                    placeholder="Ex: 12.345-6"
+                    className="text-on-surface font-medium border-b border-outline-variant/20 pb-1 bg-transparent w-full focus:outline-none focus:border-primary transition-colors"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Cargo</label>
+                  <select
+                    value={respCargo || "Diretor(a) Escolar"}
+                    onChange={(e) => setRespCargo(e.target.value)}
+                    className="text-on-surface font-medium border-b border-outline-variant/20 pb-1 bg-transparent w-full focus:outline-none focus:border-primary transition-colors cursor-pointer"
+                  >
+                    <option value="Diretor(a) Escolar">Diretor(a) Escolar</option>
+                    <option value="Professor(a) Substituindo Direção">Professor(a) Substituindo Direção</option>
+                  </select>
                 </div>
 
                 <div className="md:col-span-3 flex justify-end mt-4">

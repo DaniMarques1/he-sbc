@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
+import { createClient } from "@/utils/supabase/server";
 
 export async function generateHistoricoAction(formData: FormData): Promise<{ base64?: string, error?: string, templateName?: string }> {
     try {
@@ -163,6 +164,18 @@ export async function generateHistoricoAction(formData: FormData): Promise<{ bas
         }
         data["ANO_CORRENTE"] = anoCorrente;
 
+        // Montar Bloco de Assinatura Condicional
+        const cargoResp = formData.get("CARGO_RESPONSAVEL")?.toString().trim() || "Diretor(a) Escolar";
+        const nomeResp = formData.get("NOME_RESPONSAVEL")?.toString().trim();
+        const matResp = formData.get("MATRICULA_RESPONSAVEL")?.toString().trim();
+
+        const assinaturaLinhas = [];
+        if (nomeResp) assinaturaLinhas.push(nomeResp);
+        if (matResp) assinaturaLinhas.push(matResp);
+        assinaturaLinhas.push(cargoResp);
+
+        data["ASSINATURA_RESPONSAVEL"] = assinaturaLinhas.join("\n");
+
         const dataCabecalho = formData.get("DATA_CABECALHO")?.toString() || "";
         if (dataCabecalho) {
             const [yyyy, mm, dd] = dataCabecalho.split("-");
@@ -231,6 +244,22 @@ export async function generateHistoricoAction(formData: FormData): Promise<{ bas
         }
 
         doc.render(data);
+
+        // Registro assíncrono do histórico no banco de dados (silencioso - não trava a geração)
+        const rawJson: Record<string, any> = {};
+        formData.forEach((value, key) => {
+            rawJson[key] = value.toString();
+        });
+
+        createClient().then(async (supabase) => {
+            const { data: userData } = await supabase.auth.getUser();
+            await supabase.from('historicos_gerados').insert({
+                user_id: userData?.user?.id || null,
+                data: rawJson
+            });
+        }).catch(err => {
+            console.error("Erro silenciado ao salvar registro de histórico:", err);
+        });
 
         // Mágica do XML: Mesclar as células de Resolução Verticalmente e Limpar as bordas horizontais cruzadas
         const xmlFile = doc.getZip().file("word/document.xml");

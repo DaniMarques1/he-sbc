@@ -10,6 +10,9 @@ export function DadosUnidadeEscolar({ user }: { user?: any }) {
   const [emebTel1, setEmebTel1] = useState("");
   const [emebTel2, setEmebTel2] = useState("");
   const [emebAtoCriacao, setEmebAtoCriacao] = useState("");
+  const [respNome, setRespNome] = useState("");
+  const [respMatricula, setRespMatricula] = useState("");
+  const [respCargo, setRespCargo] = useState("Diretor(a) Escolar");
 
   useEffect(() => {
     if (user?.user_metadata) {
@@ -20,6 +23,9 @@ export function DadosUnidadeEscolar({ user }: { user?: any }) {
       if (meta.emeb_tel1) setEmebTel1(meta.emeb_tel1);
       if (meta.emeb_tel2) setEmebTel2(meta.emeb_tel2);
       if (meta.emeb_ato_criacao) setEmebAtoCriacao(meta.emeb_ato_criacao);
+      if (meta.resp_nome) setRespNome(meta.resp_nome);
+      if (meta.resp_matricula) setRespMatricula(meta.resp_matricula);
+      if (meta.resp_cargo) setRespCargo(meta.resp_cargo);
     }
   }, [user]);
 
@@ -36,6 +42,9 @@ export function DadosUnidadeEscolar({ user }: { user?: any }) {
       setEmebTel1(data.TEL_1 || meta.emeb_tel1 || "");
       setEmebTel2(data.TEL_2 || meta.emeb_tel2 || "");
       setEmebAtoCriacao(data.ATO_DE_CRIACAO || meta.emeb_ato_criacao || "");
+      setRespNome(data.NOME_RESPONSAVEL || meta.resp_nome || "");
+      setRespMatricula(data.MATRICULA_RESPONSAVEL || meta.resp_matricula || "");
+      setRespCargo(data.CARGO_RESPONSAVEL || meta.resp_cargo || "Diretor(a) Escolar");
     };
 
     window.addEventListener("onTemplateLoaded", handleTemplateLoad);
@@ -84,6 +93,27 @@ export function DadosUnidadeEscolar({ user }: { user?: any }) {
             <div className="space-y-1">
               <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Ato de Criação</label>
               <input type="text" name="ATO_DE_CRIACAO" value={emebAtoCriacao} onChange={(e) => setEmebAtoCriacao(e.target.value)} onInvalid={() => setIsExpanded(true)} placeholder="DECRETO nº 99.999 de 01/01/2000" required className="text-on-surface font-medium border-b border-outline-variant/20 pb-1 bg-transparent w-full focus:outline-none placeholder:text-on-surface/30" />
+            </div>
+          </div>
+
+          <div className="space-y-1 mt-4 border-t border-outline-variant/20 pt-6">
+            <h4 className="text-xs font-bold text-secondary uppercase tracking-widest mb-4">Informações do Responsável (Assinatura)</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="space-y-1">
+                <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Nome do Responsável</label>
+                <input type="text" name="NOME_RESPONSAVEL" value={respNome} onChange={(e) => setRespNome(e.target.value)} onInvalid={() => setIsExpanded(true)} placeholder="Nome Completo" className="text-on-surface font-medium border-b border-outline-variant/20 pb-1 bg-transparent w-full focus:outline-none placeholder:text-on-surface/30" />
+              </div>
+              <div className="space-y-1">
+                <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Matrícula</label>
+                <input type="text" name="MATRICULA_RESPONSAVEL" value={respMatricula} onChange={(e) => setRespMatricula(e.target.value)} onInvalid={() => setIsExpanded(true)} placeholder="12.345-6" className="text-on-surface font-medium border-b border-outline-variant/20 pb-1 bg-transparent w-full focus:outline-none placeholder:text-on-surface/30" />
+              </div>
+              <div className="space-y-1">
+                <label className="block text-[10px] font-label font-bold text-secondary uppercase tracking-widest">Cargo</label>
+                <select name="CARGO_RESPONSAVEL" value={respCargo} onChange={(e) => setRespCargo(e.target.value)} className="text-on-surface font-medium border-b border-outline-variant/20 pb-1 bg-transparent w-full focus:outline-none cursor-pointer">
+                  <option value="Diretor(a) Escolar">Diretor(a) Escolar</option>
+                  <option value="Professor(a) Substituindo Direção">Professor(a) Substituindo Direção</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>

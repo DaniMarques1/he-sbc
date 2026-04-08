@@ -12,6 +12,7 @@ import { Observacoes } from "@/components/Observacoes";
 import { BotoesAcao } from "@/components/BotoesAcao";
 import { Analytics } from "@vercel/analytics/next";
 import { generateHistoricoAction } from "./actions/generateHistorico";
+import { generateHistoricoBatchAction } from "./actions/generateHistoricoBatch";
 import { createClient } from "@/utils/supabase/client";
 import { Toast } from "@/components/Toast";
 import { TemplateSavePopover } from "@/components/TemplateManager";
@@ -23,6 +24,7 @@ export default function HistoricoEscolar() {
   const [isUserLoaded, setIsUserLoaded] = useState(false);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [alunoDataToSave, setAlunoDataToSave] = useState<any>(null);
+  const [progressMsg, setProgressMsg] = useState("");
 
   useEffect(() => {
     const supabase = createClient();
@@ -75,40 +77,83 @@ export default function HistoricoEscolar() {
 
     if (action === "doc") {
       setIsPending(true);
+      setProgressMsg("");
+
       try {
         const formData = new FormData(e.currentTarget);
-        const result = await generateHistoricoAction(formData);
+        const isBatch = formData.get("MALA_DIRETA_ENABLED") === "true";
 
-        if (result.error) {
-          window.dispatchEvent(new CustomEvent('show_toast', { detail: "Erro gerando documento: " + result.error }));
-        } else if (result.base64) {
-          const byteCharacters = atob(result.base64);
-          const byteNumbers = new Array(byteCharacters.length);
-          for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        if (isBatch) {
+          const alunosBatchStr = formData.get("ALUNOS_BATCH")?.toString() || "[]";
+          const alunosBatch = JSON.parse(alunosBatchStr);
+
+          if (alunosBatch.length === 0) {
+            window.dispatchEvent(new CustomEvent('show_toast', { detail: "Nenhum aluno adicionado na Mala Direta." }));
+            setIsPending(false);
+            return;
           }
-          const byteArray = new Uint8Array(byteNumbers);
-          const blob = new Blob([byteArray], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
 
-          const nomeAluno = formData.get("NOME_ALUNO")?.toString() || "Aluno";
-          let anoHistorico = "";
-          for (let i = 1; i <= 5; i++) {
-            if (formData.get(`CONCLUSAO_${i}`) === "on" || formData.get(`TRANSF_${i}`) === "on") {
-              anoHistorico = formData.get(`ANO_${i}`)?.toString() || "";
-              break;
+          setProgressMsg(`Processando lote unificado com ${alunosBatch.length} alunos... Isso pode levar alguns segundos dependendo do tamanho.`);
+          
+          const result = await generateHistoricoBatchAction(formData, alunosBatch);
+
+          if (result.error || result.status === "error") {
+             console.error(result.error);
+             window.dispatchEvent(new CustomEvent('show_toast', { detail: `Erro gerando mala direta: ${result.error}` }));
+             setIsPending(false);
+             setProgressMsg("");
+             return;
+          }
+
+          if (result.base64) {
+            const byteCharacters = atob(result.base64);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+              byteNumbers[i] = byteCharacters.charCodeAt(i);
             }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+            const saveAs = (await import("file-saver")).saveAs;
+            saveAs(blob, "Historicos_MalaDireta.docx");
+            window.dispatchEvent(new CustomEvent('show_toast', { detail: "Mala direta gerada com sucesso!" }));
           }
 
-          const safeFileName = anoHistorico ? `${nomeAluno}-${anoHistorico}.docx` : `${nomeAluno}.docx`;
+        } else {
+          // Geração Individual Restante Original
+          const result = await generateHistoricoAction(formData);
 
-          const saveAs = (await import("file-saver")).saveAs;
-          saveAs(blob, safeFileName);
+          if (result.error) {
+            window.dispatchEvent(new CustomEvent('show_toast', { detail: "Erro gerando documento: " + result.error }));
+          } else if (result.base64) {
+            const byteCharacters = atob(result.base64);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+              byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+
+            const nomeAluno = formData.get("NOME_ALUNO")?.toString() || "Aluno";
+            let anoHistorico = "";
+            for (let i = 1; i <= 5; i++) {
+              if (formData.get(`CONCLUSAO_${i}`) === "on" || formData.get(`TRANSF_${i}`) === "on") {
+                anoHistorico = formData.get(`ANO_${i}`)?.toString() || "";
+                break;
+              }
+            }
+
+            const safeFileName = anoHistorico ? `${nomeAluno}-${anoHistorico}.docx` : `${nomeAluno}.docx`;
+
+            const saveAs = (await import("file-saver")).saveAs;
+            saveAs(blob, safeFileName);
+          }
         }
       } catch (err) {
         console.error(err);
-        alert("Erro inesperado gerando documento.");
+        alert("Erro inesperado gerando documento(s).");
       } finally {
         setIsPending(false);
+        setProgressMsg("");
       }
     } else if (action === "save_template") {
       if (!user) {
@@ -139,6 +184,11 @@ export default function HistoricoEscolar() {
           isMobileMenuOpen={isMobileMenuOpen}
           onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         />
+        {isPending && progressMsg && (
+          <div className="fixed top-0 left-0 w-full z-50 bg-primary text-white text-xs font-bold text-center py-2 animate-pulse transition-all">
+             {progressMsg}
+          </div>
+        )}
 
         <form id="historicoForm" onSubmit={handleSubmit} className="px-4 md:px-10 py-6 md:py-8 max-w-7xl mx-auto space-y-8 md:space-y-10">
 
