@@ -18,8 +18,8 @@ export function TransferenciaDuranteAnoLetivo() {
 
     const handleTemplateLoad = (e: any) => {
       const data = e.detail;
-      if (data && data.SEM_TRANSF_MEIO_ANO !== undefined) {
-        setIsEmpty(data.SEM_TRANSF_MEIO_ANO === "on");
+      if (data) {
+        setIsEmpty(data.SEM_TRANSF_MEIO_ANO === "on" || data.SEM_TRANSF_MEIO_ANO === true);
       }
     };
 

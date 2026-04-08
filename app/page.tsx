@@ -20,34 +20,65 @@ export default function HistoricoEscolar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
-  const [templateModalMode, setTemplateModalMode] = useState<"load" | "save">("load");
+  const [isUserLoaded, setIsUserLoaded] = useState(false);
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [alunoDataToSave, setAlunoDataToSave] = useState<any>(null);
 
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user);
+      setIsUserLoaded(true);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      setIsUserLoaded(true);
     });
 
     return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const pendingJson = sessionStorage.getItem('he_sbc_pending_template');
+    if (pendingJson) {
+      try {
+        const flatData = JSON.parse(pendingJson);
+        setTimeout(() => { // small delay to ensure DOM is ready
+          Object.keys(flatData).forEach(key => {
+            const els = document.getElementsByName(key);
+            if (els && els.length > 0) {
+              const el = els[0] as HTMLInputElement | HTMLSelectElement;
+              if (el.type === 'checkbox' || el.type === 'radio') {
+                (el as HTMLInputElement).checked = flatData[key] === 'on' || flatData[key] === true;
+              } else {
+                el.value = flatData[key];
+              }
+              el.dispatchEvent(new Event("change", { bubbles: true }));
+              el.dispatchEvent(new Event("input", { bubbles: true }));
+            }
+          });
+          window.dispatchEvent(new CustomEvent('onTemplateLoaded', { detail: flatData }));
+          window.dispatchEvent(new CustomEvent('show_toast', { detail: 'Template carregado com sucesso!' }));
+        }, 100);
+      } catch (err) {
+        console.error("Erro processando template", err);
+      }
+      sessionStorage.removeItem('he_sbc_pending_template');
+    }
   }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const submitter = (e.nativeEvent as SubmitEvent).submitter;
     const action = submitter?.getAttribute("value");
-    
+
     if (action === "doc") {
       setIsPending(true);
       try {
         const formData = new FormData(e.currentTarget);
         const result = await generateHistoricoAction(formData);
-        
+
         if (result.error) {
           window.dispatchEvent(new CustomEvent('show_toast', { detail: "Erro gerando documento: " + result.error }));
         } else if (result.base64) {
@@ -58,7 +89,7 @@ export default function HistoricoEscolar() {
           }
           const byteArray = new Uint8Array(byteNumbers);
           const blob = new Blob([byteArray], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
-          
+
           const nomeAluno = formData.get("NOME_ALUNO")?.toString() || "Aluno";
           let anoHistorico = "";
           for (let i = 1; i <= 5; i++) {
@@ -69,7 +100,7 @@ export default function HistoricoEscolar() {
           }
 
           const safeFileName = anoHistorico ? `${nomeAluno}-${anoHistorico}.docx` : `${nomeAluno}.docx`;
-          
+
           const saveAs = (await import("file-saver")).saveAs;
           saveAs(blob, safeFileName);
         }
@@ -89,12 +120,11 @@ export default function HistoricoEscolar() {
       formData.forEach((value, key) => {
         dataObj[key] = value;
       });
-      
+
       setAlunoDataToSave(dataObj);
-      setTemplateModalMode("save");
-      setIsTemplateModalOpen(true);
+      setIsSaveModalOpen(true);
     } else {
-        alert("Ação não implementada ainda.");
+      alert("Ação não implementada ainda.");
     }
   };
 
@@ -102,7 +132,7 @@ export default function HistoricoEscolar() {
     <>
       <Toast />
       <Analytics />
-      <Sidebar user={user} isLoadOpen={templateModalMode === "load" && isTemplateModalOpen} onOpenLoad={() => { setTemplateModalMode("load"); setIsTemplateModalOpen(true); }} onCloseLoad={() => setIsTemplateModalOpen(false)} />
+      <Sidebar user={user} />
       <main className="md:ml-64 min-h-screen transition-all duration-300">
         <Header
           isPending={isPending}
@@ -111,20 +141,29 @@ export default function HistoricoEscolar() {
         />
 
         <form id="historicoForm" onSubmit={handleSubmit} className="px-4 md:px-10 py-6 md:py-8 max-w-7xl mx-auto space-y-8 md:space-y-10">
-          
-          <DadosUnidadeEscolar />
+
+          {isUserLoaded && !user && (
+            <div className="flex flex-col md:flex-row items-center gap-3 bg-surface-container-low border border-outline-variant/30 px-5 py-4 rounded-3xl w-full shadow-sm relative z-10">
+              <span className="bg-error text-white text-[10px] uppercase font-bold px-3 py-1.5 rounded-full animate-pulse tracking-wider">Desconectado</span>
+              <p className="text-xs md:text-sm text-secondary font-medium text-center md:text-left">
+                <a href="/login" className="text-primary font-bold hover:underline relative z-20">Faça Login</a> para aproveitar melhor o sistema, com salvamento de múltiplos templates e auto-preenchimento de configurações.
+              </p>
+            </div>
+          )}
+
+          <DadosUnidadeEscolar user={user} />
           <IdentificacaoAluno />
           <ResultadosEnsinoFundamental />
-          <PercursoAcademico />
+          <PercursoAcademico user={user} />
           <TransferenciaDuranteAnoLetivo />
           <Observacoes />
 
           <div className="relative w-full">
-            <TemplateSavePopover 
-              isOpen={templateModalMode === "save" && isTemplateModalOpen} 
-              onClose={() => setIsTemplateModalOpen(false)} 
-              user={user} 
-              alunoDataToSave={alunoDataToSave} 
+            <TemplateSavePopover
+              isOpen={isSaveModalOpen}
+              onClose={() => setIsSaveModalOpen(false)}
+              user={user}
+              alunoDataToSave={alunoDataToSave}
             />
             <BotoesAcao isPending={isPending} />
           </div>

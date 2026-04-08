@@ -11,20 +11,27 @@ interface HeaderProps {
 export function Header({ isMobileMenuOpen, onToggleMobileMenu, isPending }: HeaderProps) {
   const [currentDate, setCurrentDate] = useState("");
   const [user, setUser] = useState<any>(null);
+  const [isUserLoaded, setIsUserLoaded] = useState(false);
   const supabase = createClient();
   const router = useRouter();
 
   useEffect(() => {
-    setCurrentDate(new Date().toISOString().split('T')[0]);
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    setCurrentDate(`${year}-${month}-${day}`);
     
     // Fetch User
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user);
+      setIsUserLoaded(true);
     });
 
     // Listen to changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      setIsUserLoaded(true);
     });
 
     return () => subscription.unsubscribe();
@@ -93,26 +100,31 @@ export function Header({ isMobileMenuOpen, onToggleMobileMenu, isPending }: Head
                 PDF
               </button>
             </div>
-            {user ? (
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-bold text-primary hidden md:block">
-                  {user.user_metadata?.institution_name || user.email}
-                </span>
+            {isUserLoaded ? (
+              user ? (
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold text-primary hidden md:block">
+                    {user.user_metadata?.institution_name || user.email}
+                  </span>
+                  <button
+                    onClick={handleLogout}
+                    className="bg-surface-container-highest text-secondary text-xs px-3 py-2 rounded-lg font-bold hover:bg-[#e2e1ed] transition-colors"
+                  >
+                    Sair
+                  </button>
+                </div>
+              ) : (
                 <button
-                  onClick={handleLogout}
-                  className="bg-surface-container-highest text-secondary text-xs px-3 py-2 rounded-lg font-bold hover:bg-[#e2e1ed] transition-colors"
+                  type="button"
+                  onClick={handleLoginRedirect}
+                  className="bg-gradient-to-br from-primary to-primary-container text-white px-5 py-2 rounded-lg font-manrope font-bold text-xs shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
                 >
-                  Sair
+                  <span className="material-symbols-outlined text-[16px]" data-icon="login">login</span>
+                  Entrar
                 </button>
-              </div>
+              )
             ) : (
-              <button
-                onClick={handleLoginRedirect}
-                className="bg-gradient-to-br from-primary to-primary-container text-white px-5 py-2 rounded-lg font-manrope font-bold text-xs shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
-              >
-                <span className="material-symbols-outlined text-[16px]" data-icon="login">login</span>
-                Entrar
-              </button>
+              <div className="w-24 h-8 bg-surface-container-highest animate-pulse rounded-lg"></div>
             )}
           </div>
         </div>
@@ -120,18 +132,52 @@ export function Header({ isMobileMenuOpen, onToggleMobileMenu, isPending }: Head
 
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-outline-variant/10 bg-[#fbf8ff] shadow-sm pb-2">
-          <nav className="flex flex-col">
-            <a className="flex items-center gap-4 px-6 py-3 text-[#1A237E] bg-primary-container/10 font-manrope font-semibold" href="#">
+          <nav className="flex flex-col py-2">
+            <a className="flex items-center gap-4 px-6 py-3 text-[#1A237E] bg-[#1A237E]/5 font-manrope font-bold" href="/">
               <span className="material-symbols-outlined" data-icon="description">description</span>
               <span className="text-sm">Histórico Escolar</span>
             </a>
+            <a className="flex items-center gap-4 px-6 py-3 text-[#585c80] hover:bg-[#e2e1ed] transition-colors font-manrope font-semibold" href={user ? "/profile" : "/login"}>
+              <span className="material-symbols-outlined" data-icon="manage_accounts">manage_accounts</span>
+              <span className="text-sm flex items-center gap-2">
+                Meu Perfil
+                {user && (!user.user_metadata?.emeb_name || !user.user_metadata?.emeb_cep) && (
+                  <span className="bg-error text-white text-[9px] uppercase font-bold px-2 py-0.5 rounded-full animate-pulse tracking-wider">Pendente</span>
+                )}
+              </span>
+            </a>
+            <a className="flex items-center gap-4 px-6 py-3 text-[#585c80] hover:bg-[#e2e1ed] transition-colors font-manrope font-semibold" href={user ? "/templates" : "/login"}>
+              <span className="material-symbols-outlined" data-icon="folder_special">folder_special</span>
+              <span className="text-sm">Meus Templates</span>
+            </a>
+            
+            <div className="h-px bg-outline-variant/20 mx-6 my-2"></div>
+
+            <button 
+              onClick={() => {
+                navigator.clipboard.writeText('48197@emeb.saobernardo.sp.gov.br');
+                window.dispatchEvent(new CustomEvent('show_toast', { detail: 'E-mail copiado: 48197@emeb.saobernardo.sp.gov.br' }));
+              }}
+              className="flex w-full items-center gap-4 px-6 py-3 text-[#585c80] hover:bg-[#e2e1ed] transition-colors font-manrope font-semibold text-left"
+            >
+              <div className="w-8 h-8 rounded-full bg-[#1A237E]/10 flex items-center justify-center shrink-0 text-[#1A237E]">
+                 <span className="material-symbols-outlined text-[16px]" data-icon="badge">badge</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[11px] font-bold text-[#1A237E]">Daniel Marques de Sousa</span>
+                <span className="text-[10px] text-secondary/70">Dev / Copiar E-mail (48197-6)</span>
+              </div>
+            </button>
+
+            <div className="h-px bg-outline-variant/20 mx-6 my-2"></div>
+
             {user ? (
-              <button onClick={handleLogout} className="flex w-full items-center gap-4 px-6 py-3 text-[#585c80] hover:bg-[#e2e1ed] transition-colors font-manrope font-semibold">
+              <button onClick={handleLogout} className="flex w-full items-center gap-4 px-6 py-3 text-error hover:bg-error/10 transition-colors font-manrope font-bold">
                 <span className="material-symbols-outlined" data-icon="logout">logout</span>
-                <span className="text-sm">Sair</span>
+                <span className="text-sm">Sair da Conta</span>
               </button>
             ) : (
-              <button onClick={handleLoginRedirect} className="flex w-full items-center gap-4 px-6 py-3 text-[#585c80] hover:bg-[#e2e1ed] transition-colors font-manrope font-semibold">
+              <button onClick={handleLoginRedirect} className="flex w-full items-center gap-4 px-6 py-3 text-[#1A237E] hover:bg-[#1A237E]/10 transition-colors font-manrope font-bold">
                 <span className="material-symbols-outlined" data-icon="login">login</span>
                 <span className="text-sm">Entrar</span>
               </button>

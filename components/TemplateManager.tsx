@@ -119,6 +119,13 @@ export function TemplateSavePopover({ isOpen, onClose, user, alunoDataToSave }: 
 
   const handleSaveNew = async () => {
     if (!templateName) { alert("Digite um nome!"); return; }
+    
+    if (templates.length >= 10) {
+      window.dispatchEvent(new CustomEvent('show_toast', { detail: 'Limite de 10 templates atingido! Sobrescreva um existente.' }));
+      alert("Você atingiu o limite grátis de 10 templates salvos na nuvem.\n\nPor gentileza, clique em 'Sobrescrever' em um de seus templates antigos ou vá até a página 'Meus Templates' e apague arquivos antigos.");
+      return;
+    }
+
     setIsSaving(true);
     const { error } = await supabase.from("templates").insert([{ user_id: user.id, template_name: templateName, aluno_data: alunoDataToSave }]);
     if (error) alert("Erro: " + error.message);
@@ -144,8 +151,7 @@ export function TemplateSavePopover({ isOpen, onClose, user, alunoDataToSave }: 
 
   return (
     <div 
-      className="absolute bottom-full mb-4 right-0 bg-white rounded-3xl drop-shadow-[0_-5px_45px_rgba(0,0,0,0.18)] z-[9999] flex flex-col before:content-[''] before:absolute before:-bottom-2 before:right-[80px] before:w-4 before:h-4 before:bg-white before:rotate-45"
-      style={{ width: "450px" }}
+      className="absolute bottom-full mb-4 right-0 md:-right-4 w-[90vw] sm:w-[450px] max-w-[100vw] bg-white rounded-3xl drop-shadow-[0_-5px_45px_rgba(0,0,0,0.18)] z-[9999] flex flex-col before:content-[''] before:absolute before:-bottom-2 before:right-[80px] before:w-4 before:h-4 before:bg-white before:rotate-45"
     >
       <div className="flex items-center justify-between p-6 bg-surface-container-low relative z-10 rounded-t-3xl">
         <h3 className="text-base font-bold text-primary flex items-center gap-2">
@@ -157,7 +163,12 @@ export function TemplateSavePopover({ isOpen, onClose, user, alunoDataToSave }: 
       
       <div className="p-8 flex flex-col gap-6 relative z-10 bg-white rounded-b-3xl">
         <div className="flex flex-col gap-3 relative">
-          <label className="text-[11px] font-bold text-secondary uppercase tracking-widest pl-1">Nome do Novo Template:</label>
+          <div className="flex justify-between items-center pl-1">
+            <label className="text-[11px] font-bold text-secondary uppercase tracking-widest">Nome do Novo Template:</label>
+            <span className={`text-[10px] font-bold ${templates.length >= 10 ? 'text-error' : 'text-primary'}`}>
+              {templates.length}/10 Arquivos
+            </span>
+          </div>
           <input 
             type="text" value={templateName} onChange={(e) => setTemplateName(e.target.value)}
             placeholder="NOME DO SEU TEMPLATE..."

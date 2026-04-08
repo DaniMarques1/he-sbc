@@ -49,22 +49,51 @@ export function Observacoes() {
         .map(k => k.replace('obs_title_', ''));
 
       if (obsIds.length > 0) {
-        const newObs: Observation[] = obsIds.map(id => ({
-          id,
-          title: data[`obs_title_${id}`] || "",
-          text: data[`obs_text_${id}`] || "",
-          checked: data[`obs_checked_${id}`] === "on"
-        }));
-        
-        // Ordenação básica: IDs numéricos primeiro, depois por timestamp (Date.now)
-        newObs.sort((a, b) => {
-          const aNum = parseInt(a.id);
-          const bNum = parseInt(b.id);
-          if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
-          return a.id.localeCompare(b.id);
+        const loadedObs: Observation[] = [];
+        const defaultIds = defaultObs.map(o => o.id);
+
+        // 1. Reconstrói as observações padrão na ordem original definida em defaultObs
+        defaultObs.forEach(defaultItem => {
+          const id = defaultItem.id;
+          if (data[`obs_title_${id}`] !== undefined) {
+            loadedObs.push({
+              id,
+              title: data[`obs_title_${id}`] || "",
+              text: data[`obs_text_${id}`] || "",
+              checked: data[`obs_checked_${id}`] === "on"
+            });
+          } else {
+            // Se não encontrou no template salvo (provavelmente porque foi desmarcada antes de salvar
+            // e os inputs foram desabilitados), adiciona de volta aos itens padrão, mas desmarcada.
+            loadedObs.push({
+              id,
+              title: defaultItem.title,
+              text: defaultItem.text,
+              checked: false
+            });
+          }
         });
 
-        setObservations(newObs);
+        // 2. Identifica e anexa observações personalizadas (que não estão no defaultObs)
+        const customIds = obsIds.filter(id => !defaultIds.includes(id));
+        customIds.sort((a, b) => a.localeCompare(b));
+
+        customIds.forEach(id => {
+          loadedObs.push({
+            id,
+            title: data[`obs_title_${id}`] || "",
+            text: data[`obs_text_${id}`] || "",
+            checked: data[`obs_checked_${id}`] === "on"
+          });
+        });
+
+        if (loadedObs.length > 0) {
+          setObservations(loadedObs);
+          // Expande o grupo 2020 se algum item de lá estiver marcado
+          if (loadedObs.slice(2, 7).some(o => o.checked)) {
+            setIs2020Expanded(true);
+          }
+        }
       }
     };
 

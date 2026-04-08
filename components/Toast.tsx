@@ -11,7 +11,7 @@ export function Toast() {
       setMessage(e.detail);
       setVisible(true);
       clearTimeout(timer);
-      timer = setTimeout(() => setVisible(false), 3500);
+      timer = setTimeout(() => setVisible(false), 10000);
     };
 
     window.addEventListener("show_toast", handleShowToast as any);

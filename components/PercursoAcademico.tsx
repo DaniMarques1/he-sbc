@@ -2,19 +2,20 @@
 
 import { useState, useEffect } from "react";
 
-export function PercursoAcademico() {
+export function PercursoAcademico({ user }: { user?: any }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [transferIndex, setTransferIndex] = useState<number | null>(null);
   const [conclusionIndex, setConclusionIndex] = useState<number | null>(null);
   const [educarMaisChecked, setEducarMaisChecked] = useState<Record<number, boolean>>({});
   const isAnyEducarMaisChecked = Object.values(educarMaisChecked).some(Boolean);
+  const userEmeb = user?.user_metadata?.emeb_name || "";
 
   const records = [
-    { year: "1º Ano", hours: "1000", calendar: "2022", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" },
-    { year: "2º Ano", hours: "1000", calendar: "2023", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" },
-    { year: "3º Ano", hours: "1000", calendar: "2024", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" },
-    { year: "4º Ano", hours: "1000", calendar: "2025", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" },
-    { year: "5º Ano", hours: "1000", calendar: "2026", school: "EMEB Professor Paulo Freire", city: "São Bernardo do Campo", state: "SP" }
+    { year: "1º Ano", hours: "1000", calendar: "2022", city: "São Bernardo do Campo", state: "SP" },
+    { year: "2º Ano", hours: "1000", calendar: "2023", city: "São Bernardo do Campo", state: "SP" },
+    { year: "3º Ano", hours: "1000", calendar: "2024", city: "São Bernardo do Campo", state: "SP" },
+    { year: "4º Ano", hours: "1000", calendar: "2025", city: "São Bernardo do Campo", state: "SP" },
+    { year: "5º Ano", hours: "1000", calendar: "2026", city: "São Bernardo do Campo", state: "SP" }
   ];
 
   useEffect(() => {
@@ -180,7 +181,7 @@ export function PercursoAcademico() {
                         </td>
                       )}
                       <td className="px-2 py-3">
-                        <input type="text" name={`ESCOLA_${index + 1}`} defaultValue={record.school} disabled={isAnyDisabled} className={inputClass} />
+                        <input key={`escola-${index}-${userEmeb}`} type="text" name={`ESCOLA_${index + 1}`} defaultValue={userEmeb} placeholder="EMEB Exemplo" disabled={isAnyDisabled} className={inputClass} />
                       </td>
                       <td className="px-2 py-3">
                         <input type="text" name={`MUNIC_${index + 1}`} defaultValue={record.city} disabled={isAnyDisabled} className={inputClass} />
