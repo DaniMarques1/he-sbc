@@ -4,7 +4,6 @@ import fs from "fs";
 import path from "path";
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
-import { createClient } from "@/utils/supabase/server";
 
 export async function generateHistoricoAction(formData: FormData): Promise<{ base64?: string, error?: string, templateName?: string }> {
     try {
@@ -63,7 +62,7 @@ export async function generateHistoricoAction(formData: FormData): Promise<{ bas
             }
 
             // Carga horária Base Comum do ano de transferência é inutilizada
-            data[`HORAS_${transferYear}`] = "|MERGE_START_DIAGONAL";
+            data[`HORAS_${transferYear}`] = "-";
         }
 
         // Tabela 3 (Percurso) recebe "-" quando está vazio. E a Carga Horária recebe riscado transversal
@@ -80,7 +79,7 @@ export async function generateHistoricoAction(formData: FormData): Promise<{ bas
             horasFields.forEach(field => {
                 if (!formData.has(`${field}_${i}`) || formData.get(`${field}_${i}`)?.toString().trim() === "") {
                     if (data[`${field}_${i}`] === undefined) {
-                        data[`${field}_${i}`] = "|MERGE_START_DIAGONAL";
+                        data[`${field}_${i}`] = "-";
                     }
                 }
             });
@@ -96,7 +95,7 @@ export async function generateHistoricoAction(formData: FormData): Promise<{ bas
             } else {
                 data[`RES_EDUCARMAIS_${i}`] = "|MERGE_START_DIAGONAL";
                 if (!isBlankYear) {
-                    data[`HMAIS_${i}`] = "|MERGE_START_DIAGONAL";
+                    data[`HMAIS_${i}`] = "-";
                 }
             }
         }
@@ -117,7 +116,7 @@ export async function generateHistoricoAction(formData: FormData): Promise<{ bas
                     }
                 } else if (y === transferYear) {
                     if (i === 0) {
-                        rowObj[`nota_${y}`] = "TRANSFERE-SE |MERGE_START_VERT";
+                        rowObj[`nota_${y}`] = "|BOLD_START|TRANSFERE-SE|BOLD_END| |MERGE_START_VERT";
                     } else {
                         rowObj[`nota_${y}`] = " |MERGE_CONTINUE";
                     }
@@ -125,12 +124,14 @@ export async function generateHistoricoAction(formData: FormData): Promise<{ bas
                     const type = formData.get(`res_type_${y}`);
                     if (type === "Resolução") {
                         if (i === 0) {
-                            rowObj[`nota_${y}`] = (formData.get(`res_text_${y}`)?.toString() || "Resolução") + " |MERGE_START_VERT";
+                            const resText = formData.get(`res_text_${y}`)?.toString() || "Resolução";
+                            rowObj[`nota_${y}`] = `|BOLD_START|${resText}|BOLD_END| |MERGE_START_VERT`;
                         } else {
                             rowObj[`nota_${y}`] = " |MERGE_CONTINUE";
                         }
                     } else {
-                        rowObj[`nota_${y}`] = formData.get(`disciplina_${i}_nota_${y}`)?.toString() || " ";
+                        const nota = formData.get(`disciplina_${i}_nota_${y}`)?.toString() || " ";
+                        rowObj[`nota_${y}`] = nota.trim() ? `|BOLD_START|${nota}|BOLD_END|` : " ";
                     }
                 }
             }
@@ -218,6 +219,7 @@ export async function generateHistoricoAction(formData: FormData): Promise<{ bas
 
             const ateTrimestre = data["ATE_TRIMESTRE"];
             const textoResolucao = formData.get("TEXTO_RESOLUCAO_TRANSF")?.toString().trim() || "Resolução XX";
+            const textoResolucaoBold = `|BOLD_START|${textoResolucao}|BOLD_END|`;
 
             let show1 = false, show2 = false, show3 = false;
             if (ateTrimestre === "1º Trimestre") { show1 = true; }
@@ -225,19 +227,19 @@ export async function generateHistoricoAction(formData: FormData): Promise<{ bas
             if (ateTrimestre === "3º Trimestre") { show1 = true; show2 = true; show3 = true; }
 
             if (show1) {
-                data["exibirResolucaoTransf1"] = [{ TEXTO_DA_RESOLUCAO_TRANSF1: textoResolucao }];
+                data["exibirResolucaoTransf1"] = [{ TEXTO_DA_RESOLUCAO_TRANSF1: textoResolucaoBold }];
             } else {
                 data["exibirResolucaoTransf1"] = [{ TEXTO_DA_RESOLUCAO_TRANSF1: "|MERGE_START_DIAGONAL" }];
             }
 
             if (show2) {
-                data["exibirResolucaoTransf2"] = [{ TEXTO_DA_RESOLUCAO_TRANSF2: textoResolucao }];
+                data["exibirResolucaoTransf2"] = [{ TEXTO_DA_RESOLUCAO_TRANSF2: textoResolucaoBold }];
             } else {
                 data["exibirResolucaoTransf2"] = [{ TEXTO_DA_RESOLUCAO_TRANSF2: "|MERGE_START_DIAGONAL" }];
             }
 
             if (show3) {
-                data["exibirResolucaoTransf3"] = [{ TEXTO_DA_RESOLUCAO_TRANSF3: textoResolucao }];
+                data["exibirResolucaoTransf3"] = [{ TEXTO_DA_RESOLUCAO_TRANSF3: textoResolucaoBold }];
             } else {
                 data["exibirResolucaoTransf3"] = [{ TEXTO_DA_RESOLUCAO_TRANSF3: "|MERGE_START_DIAGONAL" }];
             }
@@ -245,21 +247,6 @@ export async function generateHistoricoAction(formData: FormData): Promise<{ bas
 
         doc.render(data);
 
-        // Registro assíncrono do histórico no banco de dados (silencioso - não trava a geração)
-        const rawJson: Record<string, any> = {};
-        formData.forEach((value, key) => {
-            rawJson[key] = value.toString();
-        });
-
-        createClient().then(async (supabase) => {
-            const { data: userData } = await supabase.auth.getUser();
-            await supabase.from('historicos_gerados').insert({
-                user_id: userData?.user?.id || null,
-                data: rawJson
-            });
-        }).catch(err => {
-            console.error("Erro silenciado ao salvar registro de histórico:", err);
-        });
 
         // Mágica do XML: Mesclar as células de Resolução Verticalmente e Limpar as bordas horizontais cruzadas
         const xmlFile = doc.getZip().file("word/document.xml");

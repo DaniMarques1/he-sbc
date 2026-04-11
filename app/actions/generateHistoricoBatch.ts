@@ -4,7 +4,6 @@ import fs from "fs";
 import path from "path";
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
-import { createClient } from "@/utils/supabase/server";
 
 export async function generateHistoricoBatchAction(formData: FormData, alunosBatch: any[]): Promise<{ status: string, base64?: string, error?: string }> {
     try {
@@ -54,7 +53,7 @@ export async function generateHistoricoBatchAction(formData: FormData, alunosBat
             if (currentEscola) {
                 baseData[`ESCOLA_${transferYear}`] = currentEscola + " - Transfere-se";
             }
-            baseData[`HORAS_${transferYear}`] = "|MERGE_START_DIAGONAL";
+            baseData[`HORAS_${transferYear}`] = "-";
         }
 
         const textFields = ['ANO', 'ESCOLA', 'MUNIC', 'UF'];
@@ -70,7 +69,7 @@ export async function generateHistoricoBatchAction(formData: FormData, alunosBat
             horasFields.forEach(field => {
                 if (!formData.has(`${field}_${i}`) || formData.get(`${field}_${i}`)?.toString().trim() === "") {
                     if (baseData[`${field}_${i}`] === undefined) {
-                        baseData[`${field}_${i}`] = "|MERGE_START_DIAGONAL";
+                        baseData[`${field}_${i}`] = "-";
                     }
                 }
             });
@@ -85,7 +84,7 @@ export async function generateHistoricoBatchAction(formData: FormData, alunosBat
             } else {
                 baseData[`RES_EDUCARMAIS_${i}`] = "|MERGE_START_DIAGONAL";
                 if (!isBlankYear) {
-                    baseData[`HMAIS_${i}`] = "|MERGE_START_DIAGONAL";
+                    baseData[`HMAIS_${i}`] = "-";
                 }
             }
         }
@@ -100,15 +99,20 @@ export async function generateHistoricoBatchAction(formData: FormData, alunosBat
                     if (i === 0) rowObj[`nota_${y}`] = " |MERGE_START_DIAGONAL";
                     else rowObj[`nota_${y}`] = " |MERGE_CONTINUE";
                 } else if (y === transferYear) {
-                    if (i === 0) rowObj[`nota_${y}`] = "TRANSFERE-SE |MERGE_START_VERT";
+                    if (i === 0) rowObj[`nota_${y}`] = "|BOLD_START|TRANSFERE-SE|BOLD_END| |MERGE_START_VERT";
                     else rowObj[`nota_${y}`] = " |MERGE_CONTINUE";
                 } else {
                     const type = formData.get(`res_type_${y}`);
                     if (type === "Resolução") {
-                        if (i === 0) rowObj[`nota_${y}`] = (formData.get(`res_text_${y}`)?.toString() || "Resolução") + " |MERGE_START_VERT";
-                        else rowObj[`nota_${y}`] = " |MERGE_CONTINUE";
+                        if (i === 0) {
+                            const resText = formData.get(`res_text_${y}`)?.toString() || "Resolução";
+                            rowObj[`nota_${y}`] = `|BOLD_START|${resText}|BOLD_END| |MERGE_START_VERT`;
+                        } else {
+                            rowObj[`nota_${y}`] = " |MERGE_CONTINUE";
+                        }
                     } else {
-                        rowObj[`nota_${y}`] = formData.get(`disciplina_${i}_nota_${y}`)?.toString() || " ";
+                        const nota = formData.get(`disciplina_${i}_nota_${y}`)?.toString() || " ";
+                        rowObj[`nota_${y}`] = nota.trim() ? `|BOLD_START|${nota}|BOLD_END|` : " ";
                     }
                 }
             }
@@ -167,18 +171,18 @@ export async function generateHistoricoBatchAction(formData: FormData, alunosBat
             transfFields.forEach(field => baseData[field] = formData.get(field)?.toString() || " ");
             const ateTrimestre = baseData["ATE_TRIMESTRE"];
             const textoResolucao = formData.get("TEXTO_RESOLUCAO_TRANSF")?.toString().trim() || "Resolução XX";
+            const textoResolucaoBold = `|BOLD_START|${textoResolucao}|BOLD_END|`;
             
             let show1 = false, show2 = false, show3 = false;
             if (ateTrimestre === "1º Trimestre") show1 = true;
             if (ateTrimestre === "2º Trimestre") { show1 = true; show2 = true; }
             if (ateTrimestre === "3º Trimestre") { show1 = true; show2 = true; show3 = true; }
             
-            baseData["exibirResolucaoTransf1"] = [{ TEXTO_DA_RESOLUCAO_TRANSF1: show1 ? textoResolucao : "|MERGE_START_DIAGONAL" }];
-            baseData["exibirResolucaoTransf2"] = [{ TEXTO_DA_RESOLUCAO_TRANSF2: show2 ? textoResolucao : "|MERGE_START_DIAGONAL" }];
-            baseData["exibirResolucaoTransf3"] = [{ TEXTO_DA_RESOLUCAO_TRANSF3: show3 ? textoResolucao : "|MERGE_START_DIAGONAL" }];
+            baseData["exibirResolucaoTransf1"] = [{ TEXTO_DA_RESOLUCAO_TRANSF1: show1 ? textoResolucaoBold : "|MERGE_START_DIAGONAL" }];
+            baseData["exibirResolucaoTransf2"] = [{ TEXTO_DA_RESOLUCAO_TRANSF2: show2 ? textoResolucaoBold : "|MERGE_START_DIAGONAL" }];
+            baseData["exibirResolucaoTransf3"] = [{ TEXTO_DA_RESOLUCAO_TRANSF3: show3 ? textoResolucaoBold : "|MERGE_START_DIAGONAL" }];
         }
 
-        const logsToInsert: any[] = [];
         let masterZip: PizZip | null = null;
         let masterXML = "";
 
@@ -322,8 +326,6 @@ export async function generateHistoricoBatchAction(formData: FormData, alunosBat
                     );
                 }
             }
-
-            logsToInsert.push({ data: alunoData }); 
         }
 
         if (masterZip && masterXML) {
@@ -331,15 +333,6 @@ export async function generateHistoricoBatchAction(formData: FormData, alunosBat
             const finalBuffer = masterZip.generate({ type: "nodebuffer", compression: "DEFLATE" });
             const finalBase64 = finalBuffer.toString("base64");
 
-            // Insert database silently for all generated records
-            createClient().then(async (supabase) => {
-                const { data: userData } = await supabase.auth.getUser();
-                const uid = userData?.user?.id || null;
-                const rows = logsToInsert.map(log => ({ user_id: uid, data: log.data }));
-                if (rows.length > 0) {
-                    await supabase.from('historicos_gerados').insert(rows);
-                }
-            }).catch(err => console.error("Falha silenciosa ao gravar batch no historico_gerados", err));
 
             return { status: "ok", base64: finalBase64 };
         }
