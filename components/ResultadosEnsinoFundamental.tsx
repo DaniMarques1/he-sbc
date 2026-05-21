@@ -17,6 +17,17 @@ export function ResultadosEnsinoFundamental() {
       const data = e.detail;
       if (!data) return;
 
+      if (data.isReset) {
+        setRowTypes({
+          1: 'Resolução',
+          2: 'Resolução',
+          3: 'Resolução',
+          4: 'Resolução',
+          5: 'Resolução',
+        });
+        return;
+      }
+
       const newRowTypes: Record<number, string> = { ...rowTypes };
       for (let i = 1; i <= 5; i++) {
         if (data[`res_type_${i}`]) {

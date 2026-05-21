@@ -25,14 +25,28 @@ export function PercursoAcademico({ user }: { user?: any }) {
       const data = e.detail;
       if (!data) return;
 
+      if (data.isReset) {
+        setConclusionIndex(null);
+        setTransferIndex(null);
+        setEducarMaisChecked({});
+        // Restore each educational establishment to the loaded userEmeb default
+        for (let i = 1; i <= 5; i++) {
+          const els = document.getElementsByName(`ESCOLA_${i}`);
+          if (els && els.length > 0) {
+            (els[0] as HTMLInputElement).value = userEmeb;
+          }
+        }
+        return;
+      }
+
       let foundConclusion: number | null = null;
       let foundTransfer: number | null = null;
       const emChecked: Record<number, boolean> = {};
 
       for (let i = 1; i <= 5; i++) {
-        if (data[`CONCLUSAO_${i}`] === "on") foundConclusion = i - 1;
-        if (data[`TRANSF_${i}`] === "on") foundTransfer = i - 1;
-        emChecked[i - 1] = data[`EDUCARMAIS_${i}`] === "on";
+        if (data[`CONCLUSAO_${i}`] === "on" || data[`CONCLUSAO_${i}`] === true) foundConclusion = i - 1;
+        if (data[`TRANSF_${i}`] === "on" || data[`TRANSF_${i}`] === true) foundTransfer = i - 1;
+        emChecked[i - 1] = data[`EDUCARMAIS_${i}`] === "on" || data[`EDUCARMAIS_${i}`] === true;
       }
 
       setConclusionIndex(foundConclusion);
@@ -42,7 +56,7 @@ export function PercursoAcademico({ user }: { user?: any }) {
 
     window.addEventListener("onTemplateLoaded", handleTemplateLoad);
     return () => window.removeEventListener("onTemplateLoaded", handleTemplateLoad);
-  }, []);
+  }, [userEmeb]);
 
   return (
     <section className="bg-surface-container-low rounded-2xl md:rounded-full overflow-hidden shadow-sm">

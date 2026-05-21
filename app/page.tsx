@@ -25,6 +25,99 @@ export default function HistoricoEscolar() {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [alunoDataToSave, setAlunoDataToSave] = useState<any>(null);
   const [progressMsg, setProgressMsg] = useState("");
+  const [baseState, setBaseState] = useState<any>(null);
+
+  // Capture the form state helper
+  const captureFormState = () => {
+    const form = document.getElementById("historicoForm") as HTMLFormElement;
+    if (!form) return null;
+    const dataObj: any = {};
+    const inputs = form.querySelectorAll("input, select, textarea");
+    inputs.forEach((el: any) => {
+      if (!el.name) return;
+      if (el.type === "checkbox" || el.type === "radio") {
+        dataObj[el.name] = el.checked;
+      } else {
+        dataObj[el.name] = el.value;
+      }
+    });
+    return dataObj;
+  };
+
+  useEffect(() => {
+    // Captura o estado limpo inicial do formulário imediatamente após a montagem do componente,
+    // antes de qualquer template de sessionStorage ou Supabase ser carregado.
+    const initial = captureFormState();
+    if (initial) {
+      setBaseState(initial);
+    }
+  }, []);
+
+  const handleReset = () => {
+    if (!baseState) {
+      window.dispatchEvent(new CustomEvent('show_toast', { detail: 'Nenhum estado anterior capturado para redefinir.' }));
+      return;
+    }
+    
+    if (!confirm("Tem certeza de que deseja redefinir os dados para o estado anterior? Todas as alterações não salvas serão perdidas.")) {
+      return;
+    }
+
+    const schoolKeys = [
+      'EMEB',
+      'ENDERECO_EMEB',
+      'CEP_EMEB',
+      'TEL_1',
+      'TEL_2',
+      'ATO_DE_CRIACAO',
+      'NOME_RESPONSAVEL',
+      'MATRICULA_RESPONSAVEL',
+      'CARGO_RESPONSAVEL'
+    ];
+
+    // Capture current school values to preserve them in the event payload
+    const currentSchoolData: any = {};
+    schoolKeys.forEach(key => {
+      const els = document.getElementsByName(key);
+      if (els && els.length > 0) {
+        currentSchoolData[key] = (els[0] as HTMLInputElement | HTMLSelectElement).value;
+      }
+    });
+
+    Object.keys(baseState).forEach(key => {
+      // Preserva os dados da unidade escolar se eles já estiverem preenchidos no formulário
+      if (schoolKeys.includes(key)) {
+        const currentEls = document.getElementsByName(key);
+        if (currentEls && currentEls.length > 0) {
+          const currentVal = (currentEls[0] as HTMLInputElement).value;
+          if (currentVal && currentVal.trim() !== "") {
+            return; // Mantém o valor escolar atual
+          }
+        }
+      }
+
+      const els = document.getElementsByName(key);
+      if (els && els.length > 0) {
+        const el = els[0] as HTMLInputElement | HTMLSelectElement;
+        if (el.type === 'checkbox' || el.type === 'radio') {
+          (el as HTMLInputElement).checked = baseState[key] === 'on' || baseState[key] === true;
+        } else {
+          el.value = baseState[key];
+        }
+        el.dispatchEvent(new Event("change", { bubbles: true }));
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    });
+
+    const resetPayload = {
+      ...baseState,
+      ...currentSchoolData,
+      isReset: true
+    };
+
+    window.dispatchEvent(new CustomEvent('onTemplateLoaded', { detail: resetPayload }));
+    window.dispatchEvent(new CustomEvent('show_toast', { detail: 'Dados redefinidos para o estado anterior!' }));
+  };
 
   useEffect(() => {
     const supabase = createClient();
@@ -93,6 +186,29 @@ export default function HistoricoEscolar() {
             return;
           }
 
+          // Validar que todos os campos de identificação de todos os alunos no lote estão preenchidos
+          for (let i = 0; i < alunosBatch.length; i++) {
+            const student = alunosBatch[i];
+            const missing = [];
+            if (!student.NOME_ALUNO?.trim()) missing.push("Nome Completo");
+            if (!student.RM?.trim()) missing.push("RM");
+            if (!student.DATA_NASCIMENTO?.trim()) missing.push("Data de Nascimento");
+            if (!student.RA?.trim()) missing.push("RA");
+            if (!student.UF_RA?.trim()) missing.push("UF do RA");
+            if (!student.MUNICIPIO?.trim()) missing.push("Naturalidade");
+            if (!student.UF?.trim()) missing.push("Estado");
+            if (!student.NACION?.trim()) missing.push("Nacionalidade");
+
+            if (missing.length > 0) {
+              const identificador = student.NOME_ALUNO?.trim() || `Linha ${i + 1}`;
+              window.dispatchEvent(new CustomEvent('show_toast', { 
+                detail: `Preencha todos os campos do aluno (${identificador}): ${missing.join(", ")}` 
+              }));
+              setIsPending(false);
+              return;
+            }
+          }
+
           setProgressMsg(`Processando lote unificado com ${alunosBatch.length} alunos... Isso pode levar alguns segundos dependendo do tamanho.`);
           
           const result = await generateHistoricoBatchAction(formData, alunosBatch);
@@ -119,6 +235,34 @@ export default function HistoricoEscolar() {
           }
 
         } else {
+          // Validar campos de identificação do aluno individual
+          const nome = formData.get("NOME_ALUNO")?.toString().trim();
+          const rm = formData.get("RM")?.toString().trim();
+          const dataNasc = formData.get("DATA_NASCIMENTO")?.toString().trim();
+          const ra = formData.get("RA")?.toString().trim();
+          const ufRa = formData.get("UF_RA")?.toString().trim();
+          const municipio = formData.get("MUNICIPIO")?.toString().trim();
+          const uf = formData.get("UF")?.toString().trim();
+          const nacion = formData.get("NACION")?.toString().trim();
+
+          const missing = [];
+          if (!nome) missing.push("Nome Completo");
+          if (!rm) missing.push("RM");
+          if (!dataNasc) missing.push("Data de Nascimento");
+          if (!ra) missing.push("RA");
+          if (!ufRa) missing.push("UF do RA");
+          if (!municipio) missing.push("Naturalidade");
+          if (!uf) missing.push("Estado");
+          if (!nacion) missing.push("Nacionalidade");
+
+          if (missing.length > 0) {
+            window.dispatchEvent(new CustomEvent('show_toast', { 
+              detail: `Preencha os seguintes campos de identificação: ${missing.join(", ")}` 
+            }));
+            setIsPending(false);
+            return;
+          }
+
           // Geração Individual Restante Original
           const result = await generateHistoricoAction(formData);
 
@@ -192,6 +336,21 @@ export default function HistoricoEscolar() {
 
         <form id="historicoForm" onSubmit={handleSubmit} className="px-4 md:px-10 py-6 md:py-8 max-w-7xl mx-auto space-y-8 md:space-y-10">
 
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-surface-container-low px-6 py-4 rounded-3xl border border-outline-variant/30 shadow-sm">
+             <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary text-[20px]">edit_note</span>
+                <span className="text-xs font-bold text-secondary uppercase tracking-wider">Formulário de Histórico Escolar</span>
+             </div>
+             <button
+               type="button"
+               onClick={handleReset}
+               className="w-full sm:w-auto border border-error/30 text-error px-6 py-2.5 rounded-xl font-manrope font-bold text-xs hover:bg-error/10 hover:border-error transition-all flex items-center justify-center gap-2"
+             >
+               <span className="material-symbols-outlined text-[16px]">restart_alt</span>
+               Redefinir Dados
+             </button>
+          </div>
+
           {isUserLoaded && !user && (
             <div className="flex flex-col md:flex-row items-center gap-3 bg-surface-container-low border border-outline-variant/30 px-5 py-4 rounded-3xl w-full shadow-sm relative z-10">
               <span className="bg-error text-white text-[10px] uppercase font-bold px-3 py-1.5 rounded-full animate-pulse tracking-wider">Desconectado</span>
@@ -216,6 +375,18 @@ export default function HistoricoEscolar() {
               alunoDataToSave={alunoDataToSave}
             />
             <BotoesAcao isPending={isPending} />
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center gap-4 bg-surface-container-low border border-outline-variant/30 px-6 py-5 rounded-3xl w-full shadow-sm text-center sm:text-left">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+              <span className="material-symbols-outlined text-2xl" data-icon="shield">shield</span>
+            </div>
+            <div className="space-y-1">
+              <h4 className="text-xs font-bold text-primary font-headline uppercase tracking-wider">Declaração de Privacidade & LGPD</h4>
+              <p className="text-xs text-secondary leading-relaxed">
+                Este sistema está em conformidade com a <b>Lei Geral de Proteção de Dados (LGPD) - <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm" target="_blank" rel="noopener noreferrer" className="text-primary font-bold underline hover:text-primary/80 transition-colors">Lei nº 13.709/2018</a></b>. Garantimos a proteção das informações inseridas: <b>nenhum dado de aluno persiste em banco de dados ou em qualquer parte do sistema</b>. O processamento dos dados ocorre de forma temporária e segura apenas para a geração imediata do arquivo de histórico escolar.
+              </p>
+            </div>
           </div>
         </form>
       </main>

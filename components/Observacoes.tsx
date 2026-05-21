@@ -43,6 +43,12 @@ export function Observacoes() {
       const data = e.detail;
       if (!data) return;
 
+      if (data.isReset) {
+        setObservations(defaultObs.map(o => ({ ...o })));
+        setIs2020Expanded(false);
+        return;
+      }
+
       // Busca todas as chaves que começam com obs_title_ para identificar as observações salvas
       const obsIds = Object.keys(data)
         .filter(k => k.startsWith('obs_title_'))
@@ -60,7 +66,7 @@ export function Observacoes() {
               id,
               title: data[`obs_title_${id}`] || "",
               text: data[`obs_text_${id}`] || "",
-              checked: data[`obs_checked_${id}`] === "on"
+              checked: data[`obs_checked_${id}`] === "on" || data[`obs_checked_${id}`] === true
             });
           } else {
             // Se não encontrou no template salvo (provavelmente porque foi desmarcada antes de salvar
@@ -83,7 +89,7 @@ export function Observacoes() {
             id,
             title: data[`obs_title_${id}`] || "",
             text: data[`obs_text_${id}`] || "",
-            checked: data[`obs_checked_${id}`] === "on"
+            checked: data[`obs_checked_${id}`] === "on" || data[`obs_checked_${id}`] === true
           });
         });
 
